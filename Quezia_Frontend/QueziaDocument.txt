@@ -1,0 +1,704 @@
+﻿Quezia is an exam-agnostic, AI-powered mock testing and performance intelligence platform built around strict structural separation, versioned test orchestration, deterministic grading, and materialized analytics. It is not a question viewer, not a content repository, and not a chat interface. It is a structured assessment engine designed to simulate real exams with fidelity while allowing flexible, user-driven practice configurations.
+The backend architecture must reflect this identity through layered responsibility separation and immutability where required.
+________________
+
+
+FOUNDATIONAL LAYER: IDENTITY AND ACCESS CONTROL
+The system begins with role-based user management.
+A User entity must contain:
+* id
+
+* email
+
+* username
+
+* passwordHash
+
+* role (LEARNER or ADMIN)
+
+* isActive
+
+* createdAt
+
+* lastLogin
+
+* USER PROFILE LAYER (ONBOARDING & PERSONAL CONTEXT)
+In addition to the core User entity used for authentication and authorization, Quezia must include a dedicated UserProfile layer. This layer is responsible for storing personal, academic, and onboarding-related information that shapes the learner’s experience, personalization, analytics context, and future product expansion.
+The User table should remain minimal and security-focused (email, password, role, status). The UserProfile table must handle all contextual and personalization data.
+________________
+
+
+Purpose of UserProfile
+The UserProfile serves four primary functions:
+   1. Onboarding Context
+Captures essential information during the onboarding flow to personalize the platform experience.
+
+   2. Academic Configuration
+Stores exam preferences, target year, and preparation stage.
+
+   3. Personalization Layer
+Enables dynamic UI behavior, AI recommendations, and tailored analytics.
+
+   4. Future Expandability
+Allows storing long-term learner attributes without polluting the core authentication model.
+
+________________
+
+
+UserProfile Structure
+UserProfile must be a one-to-one relationship with User.
+Fields should include:
+Identity & Display
+      * userId (FK → User, primary key)
+
+      * fullName
+
+      * displayName
+
+      * avatarUrl (optional)
+
+      * country
+
+      * timezone
+
+Academic Context
+         * targetExamId (FK → Exam)
+
+         * targetExamYear
+
+         * preparationStage (e.g., Beginner, Intermediate, Advanced)
+
+         * studyGoal (e.g., Rank under 1000, Top percentile goal)
+
+         * preferredSubjects (JSON array if needed)
+
+Onboarding Metadata
+            * onboardingCompleted (boolean)
+
+            * onboardingStep (for resumable onboarding flow)
+
+            * initialDiagnosticTestId (optional reference)
+
+            * preferredLanguage (future localization support)
+
+Learning Behavior Preferences
+               * preferredDifficultyBias (easy/medium/hard balance)
+
+               * dailyStudyTimeTargetMinutes
+
+               * notificationPreferences (JSON)
+
+System Metadata
+                  * createdAt
+
+                  * updatedAt
+
+________________
+
+
+Why This Separation Matters
+The UserProfile must remain separate from User because:
+                     * Authentication data must stay minimal and secure.
+
+                     * Onboarding fields evolve frequently and should not affect login logic.
+
+                     * Academic context may change over time without affecting identity.
+
+                     * Future features (mentorship, peer groups, AI coaching modes) will rely heavily on profile-level attributes.
+
+This separation maintains clean domain boundaries between:
+                        * Identity (who the user is in the system)
+
+                        * Academic intent (what the user is preparing for)
+
+                        * Behavioral data (how the user studies)
+
+                        * Performance data (how the user performs)
+
+________________
+
+
+How UserProfile Integrates with the System
+                           1. During onboarding:
+
+                              * User is created.
+
+                              * UserProfile is initialized.
+
+                              * Target exam is selected.
+
+                              * Initial preferences are stored.
+
+                                 2. During test generation:
+
+                                    * Default exam comes from UserProfile.targetExamId.
+
+                                    * AI generation bias can read preferredDifficultyBias.
+
+                                       3. During analytics:
+
+                                          * Performance is interpreted relative to targetExamYear.
+
+                                          * Goal tracking compares rank trends to studyGoal.
+
+                                             4. During personalization:
+
+                                                * UI and AI insights adapt based on preparationStage.
+
+                                                * Notifications align with dailyStudyTimeTargetMinutes.
+
+________________
+
+
+Architectural Principle
+UserProfile must act as the personalization and academic configuration layer of Quezia. It should be extensible, structured, and independent of authentication logic.
+The User entity defines access and identity.
+The UserProfile defines context and direction.
+This ensures Quezia can scale beyond a simple testing engine into a fully personalized preparation ecosystem without refactoring the core authentication model.
+
+
+
+Learners may have tiered access.
+Subscription must be relational and historical, not boolean.
+SubscriptionPack:
+                                                   * id
+
+                                                   * examId
+
+                                                   * name
+
+                                                   * durationDays
+
+                                                   * price
+
+                                                   * isActive
+
+UserSubscription:
+                                                      * id
+
+                                                      * userId
+
+                                                      * packId
+
+                                                      * status (ACTIVE, EXPIRED, CANCELLED)
+
+                                                      * startedAt
+
+                                                      * expiresAt
+
+                                                      * paymentProvider
+
+                                                      * providerReference
+
+Access control rule:
+A learner can generate or attempt tests only for exams to which they have valid access.
+________________
+
+
+EXAM DEFINITION LAYER (REFERENCE STRUCTURE)
+Quezia separates exam configuration from test instances.
+An Exam represents a high-level assessment type (e.g., JEE, NEET, GATE).
+An ExamBlueprint represents the canonical structure of that exam:
+                                                         * version
+
+                                                         * official subject composition
+
+                                                         * default section layout
+
+                                                         * default duration
+
+                                                         * default marking scheme
+
+                                                         * adaptive permissions
+
+                                                         * effective dates
+
+ExamBlueprintSection defines:
+                                                            * subject identity
+
+                                                            * sequence
+
+                                                            * optional section time constraints
+
+ExamRule defines:
+                                                               * total time
+
+                                                               * negative marking rules
+
+                                                               * partial marking
+
+                                                               * adaptive allowed
+
+                                                               * effective date ranges
+
+Blueprints are configuration artifacts.
+They define boundaries and defaults.
+They must never drive runtime dynamically.
+They serve as:
+                                                                  * Official template for system full mocks
+
+                                                                  * Validation boundary for custom generation
+
+                                                                  * Default configuration provider
+
+________________
+
+
+CRITICAL ARCHITECTURAL PRINCIPLE
+Blueprint defines what is valid.
+Test defines what is executed.
+A test may:
+                                                                     * Fully follow the official blueprint.
+
+                                                                     * Partially follow it.
+
+                                                                     * Override duration.
+
+                                                                     * Override subject distribution.
+
+                                                                     * Override question count.
+
+                                                                     * Override marking (if allowed).
+
+For example:
+Official JEE blueprint may define:
+                                                                        * 180 minutes
+
+                                                                        * 90 questions
+
+                                                                        * 30 per subject
+
+But a user-generated test may define:
+                                                                           * 90 minutes
+
+                                                                           * 80 questions
+
+                                                                           * 70 Physics
+
+                                                                           * 10 Chemistry
+
+This is valid practice behavior.
+Therefore:
+Blueprint is the canonical reference.
+Test is the frozen execution artifact.
+________________
+
+
+TEST GENERATION AND VERSIONING LAYER
+Quezia supports regeneration and refinement. Therefore, it requires a TestThread abstraction.
+TestThread:
+                                                                              * id
+
+                                                                              * examId
+
+                                                                              * createdByUserId (nullable; null = system test)
+
+                                                                              * originType (SYSTEM or GENERATED)
+
+                                                                              * title
+
+                                                                              * baseGenerationConfig (JSON snapshot)
+
+                                                                              * createdAt
+
+Each regeneration creates a new Test under the same thread.
+Test:
+                                                                                 * id
+
+                                                                                 * threadId
+
+                                                                                 * versionNumber
+
+                                                                                 * examId
+
+                                                                                 * blueprintReferenceId (nullable)
+
+                                                                                 * durationSeconds
+
+                                                                                 * totalQuestions
+
+                                                                                 * totalMarks
+
+                                                                                 * ruleSnapshot (JSON)
+
+                                                                                 * sectionSnapshot (JSON)
+
+                                                                                 * followsBlueprint (boolean)
+
+                                                                                 * status (DRAFT, PUBLISHED, ARCHIVED)
+
+                                                                                 * createdAt
+
+When a test is created, all structural data must be snapshotted:
+                                                                                    * Duration
+
+                                                                                    * Marking rules
+
+                                                                                    * Subject distribution
+
+                                                                                    * Section breakdown
+
+                                                                                    * Total marks
+
+The test must never dynamically read the blueprint after creation.
+________________
+
+
+QUESTION LIFECYCLE AND STRUCTURED CONTRACT
+Questions are structured assessment units with rich metadata.
+The question generation system must return objects with:
+                                                                                       * questionId (globally unique and immutable)
+
+                                                                                       * subject
+
+                                                                                       * topic
+
+                                                                                       * subtopic
+
+                                                                                       * difficulty (easy, medium, hard)
+
+                                                                                       * questionType ( MCQ, numeric)
+
+                                                                                       * content payload({question:””,options:[“”,””,””]})
+
+                                                                                       * correctAnswer
+
+                                                                                       * Explanation 
+
+If numeric then content payload must just question
+                                                                                       *                                                                                        * 
+
+{
+  "questionId": "PHY-THERMO-000342",
+  "subject": "Physics",
+  "topic": "Thermodynamics",
+  "subtopic": "First Law",
+  "difficulty": "medium",
+  "questionType": "MCQ",
+  "contentPayload": {
+    "question": "A gas expands at constant pressure of 2 atm from 2 L to 5 L. Calculate the work done by the gas.",
+    "options": [
+      {
+        "key": "A",
+        "text": "2 × 10^5 J"
+      },
+      {
+        "key": "B",
+        "text": "6 × 10^5 J"
+      },
+      {
+        "key": "C",
+        "text": "600 J"
+      },
+      {
+        "key": "D",
+        "text": "300 J"
+      }
+    ]
+  },
+  "correctAnswer": "D",
+  "explanation": "Work done at constant pressure = PΔV. Convert pressure to Pascals and volume to m³. Final answer = 300 J."
+}
+The backend must validate and apply:
+                                                                                          * Question uniqueness
+
+                                                                                          * Metadata consistency
+
+                                                                                          * Section compatibility
+                                                                                          * Marks
+                                                                                          * Time limit
+
+                                                                                          * Marking compatibility
+
+When inserted into TestQuestion, metadata must be snapshotted so historical tests remain unaffected by future question edits.
+Immutability is mandatory for analytics correctness.
+________________
+
+
+RUNTIME ATTEMPT ENGINE
+Test is static.
+Attempt is dynamic.
+Multiple attempts per test must be supported.
+TestAttempt:
+                                                                                             * id
+
+                                                                                             * testId
+
+                                                                                             * userId
+
+                                                                                             * startedAt
+
+                                                                                             * completedAt
+
+                                                                                             * status (ACTIVE, COMPLETED, ABANDONED)
+
+                                                                                             * totalScore
+
+                                                                                             * accuracy
+
+                                                                                             * percentile
+
+                                                                                             * timeSpentSeconds
+
+                                                                                             * riskRatio
+
+TestAttemptQuestion:
+                                                                                                * attemptId
+
+                                                                                                * testQuestionId
+
+                                                                                                * selectedAnswer
+
+                                                                                                * isCorrect
+
+                                                                                                * marksAwarded
+
+                                                                                                * timeSpentSeconds
+
+                                                                                                * markedForReview
+
+                                                                                                * visitation data
+
+Grading engine responsibilities:
+                                                                                                   * Read ruleSnapshot from Test
+
+                                                                                                   * Apply negative marking
+
+                                                                                                   * Apply partial marking
+
+                                                                                                   * Validate numeric answers using tolerance rules
+
+                                                                                                   * Compute totalScore deterministically
+
+Scoring must be reproducible and independent of blueprint changes.
+________________
+
+
+NUMERIC VALIDATION ENGINE
+Numeric questions require:
+                                                                                                      * Safe decimal parsing
+
+                                                                                                      * Handling negative values
+
+                                                                                                      * Tolerance range enforcement
+
+                                                                                                      * Rounding precision validation
+
+                                                                                                      * Protection against floating-point errors
+
+Numeric grading must rely on defined tolerance rules from question metadata.
+________________
+
+
+ANALYTICS LAYER (MATERIALIZED INTELLIGENCE)
+Analytics is the core differentiator.
+Analytics must not compute from raw attempts at request time.
+They must be materialized aggregates updated upon attempt completion.
+UserExamAnalytics:
+                                                                                                         * overallAccuracy
+
+                                                                                                         * averageScore
+
+                                                                                                         * bestRank
+
+                                                                                                         * currentStreak
+
+                                                                                                         * averageTimePerQuestion
+
+                                                                                                         * weakestSubject
+
+                                                                                                         * updatedAt
+
+UserSubjectAnalytics:
+                                                                                                            * accuracy
+
+                                                                                                            * attempts
+
+                                                                                                            * averageTime
+
+                                                                                                            * trendDelta
+
+                                                                                                            * consistencyScore
+
+                                                                                                            * lastTestedAt
+
+UserTopicAnalytics:
+                                                                                                               * accuracy
+
+                                                                                                               * attempts
+
+                                                                                                               * averageTime
+
+                                                                                                               * negativeRate
+
+                                                                                                               * easyAccuracy
+
+                                                                                                               * mediumAccuracy
+
+                                                                                                               * hardAccuracy
+
+                                                                                                               * consistencyScore
+
+                                                                                                               * trendDelta
+
+                                                                                                               * lastTestedAt
+
+PerformanceTrend:
+                                                                                                                  * chronological score
+
+                                                                                                                  * chronological accuracy
+
+                                                                                                                  * chronological percentile
+
+PeerBenchmark:
+                                                                                                                     * exam-level distribution
+
+                                                                                                                     * subject averages
+
+                                                                                                                     * percentile cutoffs
+
+Analytics must update transactionally when TestAttempt completes.
+________________
+
+
+TOPIC HEALTH AND DIAGNOSTICS
+Topic health must be algorithmically derived from:
+                                                                                                                        * Accuracy
+
+                                                                                                                        * Attempt volume
+
+                                                                                                                        * Variance
+
+                                                                                                                        * Trend direction
+
+                                                                                                                        * Recency
+
+                                                                                                                        * Difficulty split performance
+
+Classification logic:
+                                                                                                                           * Stable
+
+                                                                                                                           * Improving
+
+                                                                                                                           * Volatile
+
+                                                                                                                           * Weak
+
+These classifications must be data-driven, not manually assigned.
+________________
+
+
+TIME EFFICIENCY ANALYSIS
+The backend must correlate:
+                                                                                                                              * Difficulty vs timeSpent
+
+                                                                                                                              * Accuracy vs timeSpent
+
+                                                                                                                              * Subject vs timeSpent
+
+Derived metrics:
+                                                                                                                                 * Average time per difficulty level
+
+                                                                                                                                 * Inefficiency detection
+
+                                                                                                                                 * Overthinking vs rushing classification
+
+                                                                                                                                 * Risk ratio (aggressive vs cautious attempt behavior)
+
+________________
+
+
+COMPARATIVE BENCHMARKING
+Percentile and rank require cohort-based aggregation.
+The backend must:
+                                                                                                                                    * Maintain exam-level score distributions
+
+                                                                                                                                    * Recompute percentile bands periodically
+
+                                                                                                                                    * Assign user percentile within appropriate cohort
+
+Benchmarking must be isolated by:
+                                                                                                                                       * Exam
+
+                                                                                                                                       * Blueprint version (if relevant)
+
+                                                                                                                                       * Test format class (if necessary)
+
+________________
+
+
+AI INSIGHT LAYER
+Insights must be generated from analytics tables, not raw attempts.
+InsightLog:
+                                                                                                                                          * id
+
+                                                                                                                                          * userId
+
+                                                                                                                                          * examId
+
+                                                                                                                                          * generatedAt
+
+                                                                                                                                          * insightPayload
+
+Insights may include:
+                                                                                                                                             * Weak topic detection
+
+                                                                                                                                             * Efficiency warnings
+
+                                                                                                                                             * Improvement recognition
+
+                                                                                                                                             * Suggested focus areas
+
+Insights must be reproducible and time-stamped.
+________________
+
+
+SYSTEM TESTS VS GENERATED TESTS
+System tests:
+                                                                                                                                                * Follow official blueprint
+
+                                                                                                                                                * originType = SYSTEM
+
+                                                                                                                                                * followsBlueprint = true
+
+                                                                                                                                                * published to cohort
+
+Generated tests:
+                                                                                                                                                   * originType = GENERATED
+
+                                                                                                                                                   * createdByUserId set
+
+                                                                                                                                                   * may override structure
+
+                                                                                                                                                   * followsBlueprint may be false
+
+Retake behavior:
+Retake creates a new TestAttempt.
+Regeneration creates a new Test under the same TestThread.
+________________
+
+
+FINAL ARCHITECTURAL IDENTITY
+Quezia is a multi-exam, version-controlled assessment engine built on:
+                                                                                                                                                      * Canonical exam blueprints for structural reference
+
+                                                                                                                                                      * Flexible test generation configurations
+
+                                                                                                                                                      * Snapshot-based immutable test definitions
+
+                                                                                                                                                      * Multi-attempt runtime session tracking
+
+                                                                                                                                                      * Deterministic grading logic
+
+                                                                                                                                                      * Materialized analytics aggregation
+
+                                                                                                                                                      * Cohort benchmarking infrastructure
+
+                                                                                                                                                      * AI-powered diagnostic intelligence
+
+Blueprint defines structural boundaries and defaults.
+Test defines a frozen execution model.
+Attempt captures runtime behavior.
+Analytics transforms attempts into intelligence.
+The backend must be designed as a deterministic exam simulation and cognitive performance engine that remains flexible, extensible, and fully independent of any single exam format.
+That is the complete and final architectural definition of Quezia.

@@ -1,0 +1,591 @@
+// ======================================================
+// QUEZIA PRODUCTION SCHEMA (FINAL ARCHITECTURE)
+// ======================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ======================================================
+// ENUMS
+// ======================================================
+
+enum UserRole {
+  LEARNER
+  ADMIN
+}
+
+enum AuthEventType {
+  REGISTER
+  LOGIN
+  LOGOUT
+  PASSWORD_RESET_REQUEST
+  PASSWORD_RESET_SUCCESS
+  EMAIL_VERIFICATION_REQUEST
+  EMAIL_VERIFICATION_SUCCESS
+  ACCOUNT_SUSPENDED
+  ACCOUNT_ACTIVATED
+}
+
+enum AuthEventStatus {
+  SUCCESS
+  FAILURE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum TestOriginType {
+  SYSTEM
+  GENERATED
+}
+
+enum TestStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  MIXED
+}
+
+enum QuestionType {
+  MCQ
+  NUMERIC
+}
+
+enum PreparationStage {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum TopicHealthStatus {
+  STABLE
+  IMPROVING
+  VOLATILE
+  WEAK
+}
+
+// ======================================================
+// IDENTITY LAYER
+// ======================================================
+
+// ======================================================
+// IDENTITY LAYER
+// ======================================================
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  username     String    @unique
+  passwordHash String
+  role         UserRole  @default(LEARNER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?   @unique
+  resetPasswordToken     String?   @unique
+  resetPasswordExpires   DateTime?
+
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  profile           UserProfile?
+  sessions          Session[]
+  authLogs          AuthAuditLog[]
+  subscriptions     UserSubscription[]
+  threads           TestThread[]
+  attempts          TestAttempt[]
+  insightLogs       InsightLog[]
+  userExamAnalytics UserExamAnalytics[]
+
+  @@index([role])
+  @@index([isActive])
+}
+
+model Session {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String // Hashed for security
+  deviceInfo       String? // e.g., "Chrome on macOS"
+  ipAddress        String?
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model AuthAuditLog {
+  id         String          @id @default(cuid())
+  userId     String?
+  user       User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  event      AuthEventType
+  status     AuthEventStatus
+  ipAddress  String?
+  deviceInfo String?
+  metadata   Json? // Additional details (e.g., failure reason)
+  createdAt  DateTime        @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+// ======================================================
+// USER PROFILE LAYER (1:1)
+// ======================================================
+
+model UserProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fullName    String?
+  displayName String?
+  avatarUrl   String?
+  country     String?
+  timezone    String?
+
+  targetExamId String?
+  targetExam   Exam?   @relation(fields: [targetExamId], references: [id])
+
+  targetExamYear    Int?
+  preparationStage  PreparationStage?
+  studyGoal         String?
+  preferredSubjects Json?
+
+  onboardingCompleted     Boolean @default(false)
+  onboardingStep          Int?
+  initialDiagnosticTestId String?
+
+  preferredLanguage String?
+
+  preferredDifficultyBias     Difficulty?
+  dailyStudyTimeTargetMinutes Int?
+  notificationPreferences     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([targetExamId])
+}
+
+// ======================================================
+// SUBSCRIPTION LAYER
+// ======================================================
+
+model SubscriptionPack {
+  id     String @id @default(cuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id])
+
+  name         String
+  durationDays Int
+  price        Decimal
+  isActive     Boolean @default(true)
+
+  subscriptions UserSubscription[]
+
+  @@index([examId])
+  @@index([isActive])
+}
+
+model UserSubscription {
+  id     String @id @default(cuid())
+  userId String
+  packId String
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pack SubscriptionPack @relation(fields: [packId], references: [id])
+
+  status    SubscriptionStatus
+  startedAt DateTime
+  expiresAt DateTime
+
+  paymentProvider   String?
+  providerReference String?
+
+  @@index([userId])
+  @@index([packId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+// ======================================================
+// EXAM & BLUEPRINT LAYER (CONFIGURATION ONLY)
+// ======================================================
+
+model Exam {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  blueprints   ExamBlueprint[]
+  packs        SubscriptionPack[]
+  threads      TestThread[]
+  analytics    UserExamAnalytics[]
+  userProfiles UserProfile[]
+  tests        Test[]
+  insightLogs  InsightLog[]
+}
+
+model ExamBlueprint {
+  id     String @id @default(cuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  version                Int
+  defaultDurationSeconds Int
+  effectiveFrom          DateTime
+  effectiveTo            DateTime?
+
+  sections ExamBlueprintSection[]
+  rules    ExamRule[]
+
+  @@unique([examId, version])
+  @@index([effectiveFrom])
+}
+
+model ExamBlueprintSection {
+  id          String        @id @default(cuid())
+  blueprintId String
+  blueprint   ExamBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+
+  subject                String
+  sequence               Int
+  sectionDurationSeconds Int?
+  questionCount          Int     @default(30)
+  marksPerQuestion       Decimal @default(4)
+
+  @@index([blueprintId])
+}
+
+model ExamRule {
+  id          String        @id @default(cuid())
+  blueprintId String
+  blueprint   ExamBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+
+  totalTimeSeconds  Int
+  negativeMarking   Boolean
+  negativeMarkValue Decimal?
+  partialMarking    Boolean
+  adaptiveAllowed   Boolean
+
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+
+  @@index([blueprintId])
+}
+
+// ======================================================
+// TEST THREAD & VERSIONED TESTS (SNAPSHOT IMMUTABILITY)
+// ======================================================
+
+model TestThread {
+  id     String @id @default(cuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id])
+
+  createdByUserId String?
+  createdByUser   User?   @relation(fields: [createdByUserId], references: [id])
+
+  originType           TestOriginType
+  title                String
+  baseGenerationConfig Json
+
+  createdAt DateTime @default(now())
+
+  tests Test[]
+
+  @@index([examId])
+  @@index([createdByUserId])
+}
+
+model Test {
+  id       String     @id @default(cuid())
+  threadId String
+  thread   TestThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  versionNumber Int
+  examId        String
+  exam          Exam   @relation(fields: [examId], references: [id])
+
+  blueprintReferenceId String?
+  durationSeconds      Int
+  totalQuestions       Int
+  totalMarks           Decimal
+
+  ruleSnapshot    Json
+  sectionSnapshot Json
+
+  followsBlueprint Boolean
+  difficulty       Difficulty?
+  status           TestStatus
+
+  createdAt DateTime @default(now())
+
+  questions TestQuestion[]
+  attempts  TestAttempt[]
+
+  @@unique([threadId, versionNumber])
+  @@index([examId])
+  @@index([status])
+}
+
+// ======================================================
+// QUESTION REGISTRY (CANONICAL)
+// ======================================================
+
+model Question {
+  id                 String       @id @default(cuid())
+  questionId         String // Logical identifier (immutable across versions)
+  version            Int
+  subject            String
+  topic              String
+  subtopic           String
+  difficulty         Difficulty
+  questionType       QuestionType
+  contentPayload     Json
+  correctAnswer      String
+  explanation        String?
+  marks              Decimal
+  defaultTimeSeconds Int
+  numericTolerance   Decimal?
+  isActive           Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+
+  @@unique([questionId, version])
+  @@index([subject])
+  @@index([difficulty])
+  @@index([topic])
+  @@index([isActive])
+}
+
+// ======================================================
+// QUESTION SNAPSHOT LAYER (IMMUTABLE PER TEST)
+// ======================================================
+
+model TestQuestion {
+  id     String @id @default(cuid())
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  questionId   String
+  sectionId    String? // snapshot of which section this question belongs to
+  subject      String
+  topic        String
+  subtopic     String
+  difficulty   Difficulty
+  questionType QuestionType
+
+  contentSnapshot  Json
+  correctAnswer    String
+  explanation      String?
+  marks            Decimal
+  negativeMarkValue Decimal? // per-question negative marking override (nullable)
+  tolerance        Decimal?
+  timeSeconds      Int?     // snapshotted per-question time limit
+
+  sequence Int
+
+  attemptQuestions TestAttemptQuestion[]
+
+  @@index([testId])
+  @@index([subject])
+  @@index([difficulty])
+  @@index([topic])
+}
+
+// ======================================================
+// ATTEMPT ENGINE
+// ======================================================
+
+model TestAttempt {
+  id     String @id @default(cuid())
+  testId String
+  userId String
+
+  test Test @relation(fields: [testId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  startedAt   DateTime
+  completedAt DateTime?
+  status      AttemptStatus
+
+  totalScore       Decimal?
+  accuracy         Decimal?
+  percentile       Decimal?
+  userRank         Int?
+  timeSpentSeconds Int?
+  riskRatio        Decimal?
+
+  questions TestAttemptQuestion[]
+
+  @@index([testId])
+  @@index([userId])
+  @@index([status])
+  @@index([completedAt])
+}
+
+model TestAttemptQuestion {
+  id             String @id @default(cuid())
+  attemptId      String
+  testQuestionId String
+
+  attempt      TestAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  testQuestion TestQuestion @relation(fields: [testQuestionId], references: [id])
+
+  selectedAnswer   String?
+  isCorrect        Boolean?
+  marksAwarded     Decimal?
+  timeSpentSeconds Int?
+  markedForReview  Boolean  @default(false)
+
+  visitationData Json?
+
+  @@unique([attemptId, testQuestionId])
+  @@index([attemptId])
+}
+
+// ======================================================
+// MATERIALIZED ANALYTICS LAYER
+// ======================================================
+
+model UserExamAnalytics {
+  id     String @id @default(cuid())
+  userId String
+  examId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam Exam @relation(fields: [examId], references: [id])
+
+  overallAccuracy        Decimal
+  averageScore           Decimal
+  bestRank               Int?
+  currentStreak          Int
+  totalAttempts          Int       @default(0)
+  lastAttemptAt          DateTime?
+  averageTimePerQuestion Decimal
+  weakestSubject         String?
+
+  riskRatio          Decimal @default(0)
+  riskClassification String? // Aggressive, Balanced, Cautious
+  inefficiencyIndex  Decimal @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, examId])
+  @@index([examId])
+}
+
+model UserSubjectAnalytics {
+  id      String @id @default(cuid())
+  userId  String
+  examId  String
+  subject String
+
+  accuracy         Decimal
+  attempts         Int
+  averageTime      Decimal
+  trendDelta       Decimal
+  consistencyScore Decimal
+  lastTestedAt     DateTime?
+
+  @@unique([userId, examId, subject])
+}
+
+model UserTopicAnalytics {
+  id      String @id @default(cuid())
+  userId  String
+  examId  String
+  subject String
+  topic   String
+
+  accuracy         Decimal
+  attempts         Int
+  averageTime      Decimal
+  negativeRate     Decimal
+  easyAccuracy     Decimal
+  mediumAccuracy   Decimal
+  hardAccuracy     Decimal
+  consistencyScore Decimal
+  trendDelta       Decimal
+  lastTestedAt     DateTime?
+
+  healthStatus TopicHealthStatus
+
+  @@unique([userId, examId, subject, topic])
+}
+
+model PerformanceTrend {
+  id     String @id @default(cuid())
+  userId String
+  examId String
+
+  attemptId String? @unique
+
+  testDate   DateTime
+  score      Decimal
+  accuracy   Decimal
+  percentile Decimal
+
+  @@index([userId, examId])
+  @@index([testDate])
+}
+
+model PeerBenchmark {
+  id               String @id @default(cuid())
+  examId           String
+  blueprintVersion Int?
+
+  percentileBands   Json
+  subjectAverages   Json
+  scoreDistribution Json // Bucketed counters
+  totalParticipants Int  @default(0)
+
+  computedAt         DateTime  @default(now())
+  lastRecalculatedAt DateTime?
+
+  @@index([examId])
+}
+
+// ======================================================
+// AI INSIGHTS
+// ======================================================
+
+model InsightLog {
+  id     String @id @default(cuid())
+  userId String
+  examId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam Exam @relation(fields: [examId], references: [id])
+
+  generatedAt    DateTime @default(now())
+  insightPayload Json
+
+  @@index([userId])
+  @@index([examId])
+}

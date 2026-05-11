@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Generated test outputs
+generated_test.json
+organic_chemistry_test.json
+
+DEPLOY_EC2.md
+
+# Large data files
+*.json
+!pytest.ini
+!jee_main_full.json
+
+# Docker
+.dockerignore
+
+# Misc
+*.log

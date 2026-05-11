@@ -1,0 +1,9 @@
+[submodule "Quezia_Backend"]
+	path = Quezia_Backend
+	url = https://github.com/in-buildingphase/Quezia_core.git
+[submodule "Quezia_Frontend"]
+	path = Quezia_Frontend
+	url = https://github.com/in-buildingphase/Quezia.git
+[submodule "Quezia_AI"]
+	path = Quezia_AI
+	url = https://github.com/mxm-1x/jee-ai-service.git

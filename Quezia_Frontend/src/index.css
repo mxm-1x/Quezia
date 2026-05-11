@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/* ─── Font Faces ─── */
+@font-face {
+  font-family: 'FogtwoNo5';
+  src: url('./assets/Fogtwo No5 Font/FogtwoNo5.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/Inter Font/Inter-VariableFont_opsz,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/Inter Font/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ─── Typography Defaults ─── */
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+}
+
+h1, h2 {
+  font-family: 'FogtwoNo5', serif;
+}
+
+h3, h4, h5, h6 {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.boldonse-regular {
+  font-family: "Boldonse", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ─── Dark Mode (default) ─── */
+:root {
+  /* Backgrounds */
+  --color-bg-base: #0a0a0a;
+  --color-bg-surface: #111111;
+  --color-bg-raised: #141414;
+  --color-bg-overlay: #1a1a1a;
+  --color-bg-subtle: rgba(255, 255, 255, 0.04);
+  --color-bg-muted: rgba(255, 255, 255, 0.08);
+
+  /* Borders */
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.14);
+  --color-border-strong: rgba(255, 255, 255, 0.20);
+  --color-border-accent: rgba(236, 40, 1, 0.25);
+
+  /* Text */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a3a3a3;
+  --color-text-tertiary: #8a8a8a; /* Bumped for contrast */
+  --color-text-disabled: #666666; /* Bumped for contrast */
+  --color-text-on-color: #ffffff; /* Universal on-color text */
+
+  /* Brand Accent */
+  --color-accent: #EC2801;
+  --color-accent-hover: #d42400;
+  --color-accent-subtle: rgba(236, 40, 1, 0.12);
+  --color-accent-ring: rgba(236, 40, 1, 0.25);
+
+  /* Action States */
+  --color-action-primary-hover: #e5e5e5;
+
+  /* Semantic Layers */
+  --color-success: #22c55e;
+  --color-success-subtle: rgba(34, 197, 94, 0.10);
+  --color-on-success: #4ade80;
+
+  --color-warning: #F59E0B;
+  --color-warning-subtle: rgba(245, 158, 11, 0.10);
+  --color-on-warning: #fbbf24;
+
+  --color-error: #EF4444;
+  --color-error-subtle: rgba(239, 68, 68, 0.10);
+  --color-on-error: #f87171;
+
+  --color-info: #8B5CF6;
+  --color-info-subtle: rgba(139, 92, 246, 0.10);
+  --color-on-info: #a78bfa;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+
+  /* Charts */
+  --color-chart-primary: #EC2801;
+  --color-chart-secondary: #F97316;
+  --color-chart-tertiary: #F59E0B;
+  --color-chart-axis: #404040;
+  --color-chart-tick: #737373;
+  --color-chart-tooltip-bg: #1a1a1a;
+  --color-chart-tooltip-text: #ffffff;
+  --color-chart-dot-fill: #171717;
+}
+
+/* ─── Light Mode ─── */
+.light {
+  --color-bg-base: #fafafa;
+  --color-bg-surface: #f4f4f4;
+  --color-bg-raised: #ffffff;
+  --color-bg-overlay: #ffffff;
+  --color-bg-subtle: rgba(0, 0, 0, 0.03);
+  --color-bg-muted: rgba(0, 0, 0, 0.06);
+
+  --color-border-default: rgba(0, 0, 0, 0.08);
+  --color-border-hover: rgba(0, 0, 0, 0.14);
+  --color-border-strong: rgba(0, 0, 0, 0.20);
+  --color-border-accent: rgba(236, 40, 1, 0.15);
+
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: #404040;
+  --color-text-tertiary: #737373;
+  --color-text-disabled: #888888; /* Darkened for accessibility */
+  --color-text-on-color: #ffffff;
+
+  --color-accent: #EC2801;
+  --color-accent-hover: #d42400;
+  --color-accent-subtle: rgba(236, 40, 1, 0.08);
+  --color-accent-ring: rgba(236, 40, 1, 0.20);
+
+  /* Action States */
+  --color-action-primary-hover: #262626;
+
+  /* Semantic Layers */
+  --color-success: #16a34a;
+  --color-success-subtle: rgba(22, 163, 74, 0.08);
+  --color-on-success: #166534;
+
+  --color-warning: #d97706;
+  --color-warning-subtle: rgba(217, 119, 6, 0.08);
+  --color-on-warning: #92400e;
+
+  --color-error: #dc2626;
+  --color-error-subtle: rgba(220, 38, 38, 0.08);
+  --color-on-error: #991b1b;
+
+  --color-info: #7c3aed;
+  --color-info-subtle: rgba(124, 58, 237, 0.08);
+  --color-on-info: #5b21b6;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  --color-chart-primary: #EC2801;
+  --color-chart-secondary: #F97316;
+  --color-chart-tertiary: #F59E0B;
+  --color-chart-axis: #d4d4d4;
+  --color-chart-tick: #737373;
+  --color-chart-tooltip-bg: #ffffff;
+  --color-chart-tooltip-text: #0a0a0a;
+  --color-chart-dot-fill: #ffffff;
+}
+
+body {
+  background-color: var(--color-bg-base);
+}
