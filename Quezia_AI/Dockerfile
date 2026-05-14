@@ -28,13 +28,17 @@ COPY jee_main_full.json ./jee_main_full.json
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
+# Pre-download the embedding model to the appuser's home directory
+RUN python -c "from chromadb.utils import embedding_functions; embedding_functions.SentenceTransformerEmbeddingFunction(model_name='all-MiniLM-L6-v2')"
+
 # Expose port (Render sets $PORT dynamically)
 EXPOSE 8000
 
-# Health check (uses stdlib urllib to avoid dependency on requests)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "from urllib.request import urlopen; urlopen('http://localhost:8000/health', timeout=5)" || exit 1
+# Health check - use a script to handle the dynamic port from Render
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python -c "import os, urllib.request; port = os.getenv('PORT', '8000'); urllib.request.urlopen(f'http://localhost:{port}/health', timeout=5)" || exit 1
 
-# Run the application — use shell form so $PORT is expanded at runtime
-# Render requires binding to $PORT; falls back to 8000 locally
+# Run the application
+# We use the shell form to ensure $PORT is expanded
 CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
+

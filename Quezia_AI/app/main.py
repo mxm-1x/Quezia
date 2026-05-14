@@ -51,6 +51,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("graph_initialization_failed", error=str(e))
         raise
+
+    # Pre-load Vector Store (loads embedding model ~400MB)
+    try:
+        from app.data.vector_store import get_vector_store
+        # We wrap this in a thread to avoid blocking the event loop if it's slow,
+        # though lifespan is async anyway.
+        await asyncio.to_thread(get_vector_store)
+        logger.info("vector_store_preloaded")
+    except Exception as e:
+        # We don't necessarily want to kill the app if vector store fails,
+        # but we should log it. Actually, if it's OOM, it will kill itself.
+        logger.warning("vector_store_preload_failed", error=str(e))
     
     yield
     
