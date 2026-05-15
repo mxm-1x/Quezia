@@ -23,11 +23,11 @@ import uuid
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 
-import chromadb
-from chromadb.config import Settings
+from pinecone import Pinecone
+from app.core.config import settings
+from app.data.embeddings import get_embeddings, get_embedding_fn
 
 from app.core.logging import get_logger
-from app.data.embeddings import get_embedding_fn
 from app.models.question_schema import (
     QuestionBankItem,
     QuestionBankQuery,
@@ -46,7 +46,6 @@ logger = get_logger(__name__)
 
 # Database paths
 BANK_DIR = "./app/data/question_bank"
-CHROMA_DIR = f"{BANK_DIR}/chroma_db"
 SQLITE_PATH = f"{BANK_DIR}/questions.db"
 
 
@@ -55,35 +54,24 @@ class QuestionBank:
     The question bank — stores and retrieves richly-tagged questions.
     
     Dual storage:
-    - ChromaDB: For semantic/similarity search
+    - Pinecone: For semantic/similarity search
     - SQLite: For fast metadata filtering
-    
-    Example queries this handles:
-    - "30 physics MCQs on Mechanics, medium difficulty" → SQLite
-    - "Questions similar to Snell's Law prism problems" → ChromaDB
-    - "Easy conceptual questions where students confuse signs" → Hybrid
     """
     
     def __init__(
         self,
-        chroma_dir: str = CHROMA_DIR,
         sqlite_path: str = SQLITE_PATH,
     ):
         """Initialize the question bank with dual storage."""
-        # Ensure directories exist
-        Path(chroma_dir).mkdir(parents=True, exist_ok=True)
         Path(sqlite_path).parent.mkdir(parents=True, exist_ok=True)
         
-        # ChromaDB for semantic search
-        self.chroma_client = chromadb.PersistentClient(
-            path=chroma_dir,
-            settings=Settings(anonymized_telemetry=False)
-        )
-        self.embedding_fn = get_embedding_fn()
-        self.collection = self.chroma_client.get_or_create_collection(
-            name="question_bank",
-            embedding_function=self.embedding_fn,
-        )
+        # Pinecone for semantic search
+        if not settings.PINECONE_API_KEY:
+            logger.error("pinecone_api_key_missing")
+            self.index = None
+        else:
+            pc = Pinecone(api_key=settings.PINECONE_API_KEY)
+            self.index = pc.Index(settings.PINECONE_INDEX_NAME)
         
         # SQLite for structured queries
         self.sqlite_path = sqlite_path
@@ -91,7 +79,6 @@ class QuestionBank:
         
         logger.info(
             "question_bank_initialized",
-            chroma_count=self.collection.count(),
             sqlite_path=sqlite_path,
         )
     
@@ -218,12 +205,16 @@ class QuestionBank:
             True if stored successfully
         """
         try:
-            # Store in ChromaDB (for semantic search)
-            self.collection.upsert(
-                ids=[item.id],
-                documents=[item.to_search_text()],
-                metadatas=[item.to_flat_metadata()],
-            )
+            # Store in Pinecone (for semantic search)
+            if self.index:
+                embeddings = get_embeddings([item.to_search_text()])
+                self.index.upsert(
+                    vectors=[{
+                        "id": item.id,
+                        "values": embeddings[0],
+                        "metadata": item.to_flat_metadata()
+                    }]
+                )
             
             # Store in SQLite (for structured queries)
             self._sqlite_upsert(item)
@@ -244,16 +235,21 @@ class QuestionBank:
         success = 0
         failure = 0
         
-        # Batch ChromaDB upsert
-        if items:
+        # Batch Pinecone upsert
+        if items and self.index:
             try:
-                self.collection.upsert(
-                    ids=[item.id for item in items],
-                    documents=[item.to_search_text() for item in items],
-                    metadatas=[item.to_flat_metadata() for item in items],
-                )
+                texts = [item.to_search_text() for item in items]
+                embeddings = get_embeddings(texts)
+                vectors = []
+                for i, item in enumerate(items):
+                    vectors.append({
+                        "id": item.id,
+                        "values": embeddings[i],
+                        "metadata": item.to_flat_metadata()
+                    })
+                self.index.upsert(vectors=vectors)
             except Exception as e:
-                logger.error("chroma_batch_upsert_failed", error=str(e))
+                logger.error("pinecone_batch_upsert_failed", error=str(e))
         
         # Batch SQLite insert
         conn = sqlite3.connect(self.sqlite_path)
@@ -583,39 +579,46 @@ class QuestionBank:
         )
     
     def _semantic_query(self, q: QuestionBankQuery) -> QueryResult:
-        """Semantic search via ChromaDB with optional metadata pre-filtering."""
-        # Build ChromaDB where filter from query
-        chroma_where = {}
+        """Semantic search via Pinecone with optional metadata pre-filtering."""
+        if not self.index:
+            return self._structured_query(q)
+
+        # Build Pinecone filter from query
+        pinecone_filter = {}
         
         if q.subjects and len(q.subjects) == 1:
-            chroma_where["subject"] = q.subjects[0].value
+            pinecone_filter["subject"] = q.subjects[0].value
         
         if q.difficulties and len(q.difficulties) == 1:
-            chroma_where["difficulty"] = q.difficulties[0].value
+            pinecone_filter["difficulty"] = q.difficulties[0].value
         
         if q.question_types and len(q.question_types) == 1:
-            chroma_where["question_type"] = q.question_types[0].value
+            pinecone_filter["question_type"] = q.question_types[0].value
         
         if q.chapters and len(q.chapters) == 1:
-            chroma_where["chapter"] = q.chapters[0]
+            pinecone_filter["chapter"] = q.chapters[0]
         
         try:
+            # Get embedding for semantic query
+            query_embedding = get_embeddings([q.semantic_query])[0]
+
             # Fetch more results than needed for post-filtering
             fetch_count = min(q.count * 3, 100)
             
-            results = self.collection.query(
-                query_texts=[q.semantic_query],
-                n_results=fetch_count,
-                where=chroma_where if chroma_where else None,
+            results = self.index.query(
+                vector=query_embedding,
+                top_k=fetch_count,
+                filter=pinecone_filter if pinecone_filter else None,
+                include_metadata=False, # We get the full data from SQLite anyway
             )
             
-            if not results["ids"] or not results["ids"][0]:
+            if not results["matches"]:
                 return QueryResult(
                     questions=[], total_matching=0, query_time_ms=0, filters_applied={}
                 )
             
             # Get full question data from SQLite for matched IDs
-            matched_ids = results["ids"][0]
+            matched_ids = [match.id for match in results.matches]
             
             conn = sqlite3.connect(self.sqlite_path)
             cursor = conn.cursor()

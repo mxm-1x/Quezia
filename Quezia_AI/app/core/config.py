@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     GROQ_API_KEY: str = ""
     POLLINATIONS_API_KEY: str = ""
+    PINECONE_API_KEY: str = ""
+    PINECONE_INDEX_NAME: str = "jee-questions"
+    GOOGLE_API_KEY: str = ""
     
     # LLM Configuration
     LLM_PROVIDER: str = "groq"  # groq, openai

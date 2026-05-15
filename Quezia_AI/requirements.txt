@@ -11,8 +11,8 @@ langchain-groq==1.1.2
 openai==2.16.0
 
 # Vector store & embeddings
-chromadb==1.4.1
-sentence-transformers==5.2.2
+pinecone-client==4.1.0
+voyageai==0.3.0
 
 # Data processing
 pandas==3.0.0
