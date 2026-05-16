@@ -110,7 +110,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
 
   const getPasswordStrengthColor = () => {
     switch (passwordStrength) {
-      case 'strong': return 'text-[#EC2801] bg-red-50';
+      case 'strong': return 'text-[#111111] bg-gray-50';
       case 'medium': return 'text-yellow-600 bg-yellow-50';
       case 'weak': return 'text-gray-500 bg-gray-100';
     }
@@ -126,8 +126,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
 
   return (
     <div className="flex min-h-screen bg-white overflow-hidden font-sans">
+      <div className="bg-grain" />
+      
       {/* Left Side - Auth Form */}
-      <div className="w-full lg:w-[45%] flex flex-col relative z-10 bg-white">
+      <div className="w-full lg:w-[45%] flex flex-col relative z-10 bg-white/80 backdrop-blur-sm">
         {/* Header Navigation */}
         <div className="flex items-center justify-between p-6 lg:p-8">
           <button
@@ -151,11 +153,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
           </div>
 
           {/* Toggle Tabs */}
-          <div className="bg-gray-100 p-1 rounded-full flex mb-8 max-w-xs mx-auto w-full">
+          <div className="bg-gray-100 p-1 rounded-full flex mb-8 max-w-xs mx-auto w-full border border-gray-200/50">
             <button
               onClick={() => toggleView('register')}
               className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-200 ${isRegister
-                ? 'bg-[#EC2801] text-white shadow-md'
+                ? 'bg-[#111111] text-white shadow-md'
                 : 'text-gray-600 hover:text-gray-900'
                 }`}
             >
@@ -164,7 +166,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
             <button
               onClick={() => toggleView('login')}
               className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all duration-200 ${!isRegister
-                ? 'bg-[#EC2801] text-white shadow-md'
+                ? 'bg-[#111111] text-white shadow-md'
                 : 'text-gray-600 hover:text-gray-900'
                 }`}
             >
@@ -174,7 +176,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 flex items-center gap-2 text-red-600 text-sm">
+            <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200 flex items-center gap-2 text-[#111111] text-sm">
               <WarningCircle className="w-4 h-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
@@ -184,29 +186,20 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
           <div className="flex justify-center gap-4 mb-6">
             <button
               type="button"
-              onClick={() => {/* TODO: Google OAuth */}}
-              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-blue-500 hover:bg-blue-50 transition-all group"
+              onClick={() => {/* TODO: Implement Google OAuth */}}
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-gray-900 hover:bg-gray-50 transition-all group"
             >
-              <svg className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              <svg className="w-5 h-5 text-gray-600 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
               </svg>
             </button>
             <button
               type="button"
               onClick={() => {/* TODO: Implement Apple OAuth */}}
-              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-[#000000] hover:bg-[#00000011] transition-all group"
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-gray-900 hover:bg-gray-50 transition-all group"
             >
-              <svg className="w-5 h-5 text-[#000000] group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-900 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => {/* TODO: Google OAuth */}}
-              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-red-500 hover:bg-red-50 transition-all group"
-            >
-              <svg className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
               </svg>
             </button>
           </div>
@@ -224,21 +217,21 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
           <form className="space-y-4" onSubmit={handleSubmit}>
             {isRegister && (
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1">Username</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1 uppercase tracking-widest font-mono">Username</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   minLength={3}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all text-gray-900 placeholder-gray-400"
                   placeholder="Enter your username"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1 uppercase tracking-widest font-mono">
                 {isRegister ? 'Email' : 'Email or Username'}
               </label>
               <input
@@ -246,13 +239,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
                 value={isRegister ? email : identifier}
                 onChange={(e) => isRegister ? setEmail(e.target.value) : setIdentifier(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all text-gray-900 placeholder-gray-400"
                 placeholder={isRegister ? 'you@example.com' : 'Enter your email or username'}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1">Password</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5 ml-1 uppercase tracking-widest font-mono">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -260,12 +253,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={isRegister ? 8 : undefined}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all text-gray-900 placeholder-gray-400 pr-24"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all text-gray-900 placeholder-gray-400 pr-24"
                   placeholder="••••••••"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                   {isRegister && password && (
-                    <span className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${getPasswordStrengthColor()}`}>
+                    <span className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-tighter px-2 py-1 rounded-full ${getPasswordStrengthColor()}`}>
                       {getPasswordStrengthLabel()} <Check className="w-3 h-3" />
                     </span>
                   )}
@@ -279,8 +272,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
                 </div>
               </div>
               {isRegister && (
-                <p className="mt-1.5 text-xs text-gray-400 ml-1">
-                  Must contain uppercase, lowercase, and number
+                <p className="mt-1.5 text-[10px] text-gray-400 ml-1 uppercase tracking-widest font-mono">
+                  Include upper, lower & number
                 </p>
               )}
             </div>
@@ -290,18 +283,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
                 <button
                   type="button"
                   onClick={() => setRememberMe(!rememberMe)}
-                  className={`w-4 h-4 rounded border ${rememberMe ? 'bg-[#EC2801] border-[#EC2801]' : 'border-gray-300'} flex items-center justify-center transition-colors`}
+                  className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${rememberMe ? 'bg-[#111111] border-[#111111]' : 'border-gray-300'}`}
                 >
-                  {rememberMe && <Check className="w-3 h-3 text-white" />}
+                  {rememberMe && <Check className="w-3 h-3 text-white" weight="bold" />}
                 </button>
-                <span className="text-sm text-gray-600">Remember me</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-500 font-mono">Remember me</span>
               </div>
             ) : (
               <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={() => {/* TODO: Implement password reset */}}
-                  className="text-sm text-gray-600 hover:text-[#EC2801] font-medium"
+                  className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-[#111111] transition-colors font-mono"
                 >
                   Forgot password?
                 </button>
@@ -311,18 +304,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#EC2801] text-white py-3.5 rounded-xl font-medium hover:bg-red-700 active:scale-[0.98] transition-all mt-6 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-[#111111] text-white py-4 rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-[#333333] active:scale-[0.98] transition-all mt-6 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading && <LoadingSpinner size="sm" />}
-              {isRegister ? 'Start your preparation' : 'Sign In'}
+              {isRegister ? 'Start preparation' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-500">
+          <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 font-mono">
             {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
             <button
               onClick={() => toggleView(isRegister ? 'login' : 'register')}
-              className="font-medium text-[#EC2801] hover:underline"
+              className="text-[#111111] hover:underline underline-offset-4 decoration-gray-200"
             >
               {isRegister ? 'Log in' : 'Register'}
             </button>
@@ -330,28 +323,29 @@ const AuthPage: React.FC<AuthPageProps> = ({ defaultView = 'register' }) => {
         </div>
       </div>
 
-      {/* Right Side - Dark Placeholder with Bezel Curves */}
-      <div className="hidden lg:block lg:w-[55%] relative bg-gray-50">
-        {/* Main Dark Container with Bezel Curves */}
-        <div className="absolute inset-0 bg-[#EC2801] rounded-l-[40px] overflow-hidden shadow-2xl">
-          {/* Top Bezel Curve Decoration */}
-          <div className="absolute -top-20 -left-20 w-40 h-40 bg-[#EC2801] rounded-full opacity-50 blur-3xl"></div>
+      {/* Right Side - Visual Section with Bezel Curves */}
+      <div className="hidden lg:block lg:w-[55%] relative bg-[#FBFBFA]">
+        <div className="absolute inset-0 bg-[#111111] rounded-l-[40px] overflow-hidden shadow-2xl">
+          {/* Bezel Curve Decoration */}
+          <div className="absolute -top-20 -left-20 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
 
-          {/* Content Area - Placeholder */}
+          {/* Content Area */}
           <div className="h-full flex flex-col items-center justify-center text-white p-12 relative z-10">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-light text-white/90">
-                Your exam preparation<br />
-                starts <span className="font-serif italic text-white">here</span>
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center border border-white/10">
+                <span className="text-white text-3xl font-bold font-mono">Q</span>
+              </div>
+              <h2 className="text-4xl font-bold tracking-tight">
+                Preparation starts <span className="font-serif italic text-white/60">here</span>.
               </h2>
-              <p className="text-white/60 max-w-sm mx-auto">
-                Discover the best preparation tools and insights for your competitive exams.
+              <p className="text-white/40 max-w-sm mx-auto text-lg leading-relaxed font-light">
+                Discover the standard for serious aspirants. Deep analytics, real patterns, and verifiable mastery.
               </p>
             </div>
           </div>
 
           {/* Bottom Bezel Curve Decoration */}
-          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-red-800 rounded-full opacity-50 blur-3xl"></div>
+          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
         </div>
       </div>
     </div>

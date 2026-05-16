@@ -93,10 +93,10 @@ h3, h4, h5, h6 {
   --color-text-on-color: #ffffff; /* Universal on-color text */
 
   /* Brand Accent */
-  --color-accent: #EC2801;
-  --color-accent-hover: #d42400;
-  --color-accent-subtle: rgba(236, 40, 1, 0.12);
-  --color-accent-ring: rgba(236, 40, 1, 0.25);
+  --color-accent: #111111;
+  --color-accent-hover: #333333;
+  --color-accent-subtle: rgba(17, 17, 17, 0.08);
+  --color-accent-ring: rgba(17, 17, 17, 0.20);
 
   /* Action States */
   --color-action-primary-hover: #e5e5e5;
@@ -154,10 +154,10 @@ h3, h4, h5, h6 {
   --color-text-disabled: #888888; /* Darkened for accessibility */
   --color-text-on-color: #ffffff;
 
-  --color-accent: #EC2801;
-  --color-accent-hover: #d42400;
-  --color-accent-subtle: rgba(236, 40, 1, 0.08);
-  --color-accent-ring: rgba(236, 40, 1, 0.20);
+  --color-accent: #111111;
+  --color-accent-hover: #333333;
+  --color-accent-subtle: rgba(17, 17, 17, 0.08);
+  --color-accent-ring: rgba(17, 17, 17, 0.15);
 
   /* Action States */
   --color-action-primary-hover: #262626;

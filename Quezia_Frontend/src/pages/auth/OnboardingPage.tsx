@@ -80,8 +80,8 @@ const OnboardingPage: React.FC = () => {
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <User size={32} className="text-[#EC2801]" />
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <User size={32} className="text-[#111111]" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900">Let's get to know you</h2>
                             <p className="text-gray-500 mt-2">Personalize your Quezia experience</p>
@@ -95,7 +95,7 @@ const OnboardingPage: React.FC = () => {
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
                                     placeholder="What should we call you?"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all"
                                 />
                             </div>
                             <div>
@@ -105,7 +105,7 @@ const OnboardingPage: React.FC = () => {
                                     value={country}
                                     onChange={(e) => setCountry(e.target.value)}
                                     placeholder="Where are you from?"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -115,8 +115,8 @@ const OnboardingPage: React.FC = () => {
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <GraduationCap size={32} className="text-[#EC2801]" />
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <GraduationCap size={32} className="text-[#111111]" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900">Select your target exam</h2>
                             <p className="text-gray-500 mt-2">We'll tailor the content to your goal</p>
@@ -128,12 +128,12 @@ const OnboardingPage: React.FC = () => {
                                     key={exam.id}
                                     onClick={() => setTargetExamId(exam.id)}
                                     className={`flex items-center justify-between p-4 rounded-xl border transition-all ${targetExamId === exam.id
-                                        ? 'border-[#EC2801] bg-red-50 shadow-sm'
+                                        ? 'border-[#111111] bg-gray-50 shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 bg-white'
                                         }`}
                                 >
                                     <span className="font-medium text-gray-900">{exam.name}</span>
-                                    {targetExamId === exam.id && <CheckCircle weight="fill" className="text-[#EC2801]" />}
+                                    {targetExamId === exam.id && <CheckCircle weight="fill" className="text-[#111111]" />}
                                 </button>
                             ))}
                         </div>
@@ -143,7 +143,7 @@ const OnboardingPage: React.FC = () => {
                             <select
                                 value={targetExamYear}
                                 onChange={(e) => setTargetExamYear(parseInt(e.target.value))}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all bg-white"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all bg-white"
                             >
                                 {[2025, 2026, 2027, 2028].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -156,8 +156,8 @@ const OnboardingPage: React.FC = () => {
                 return (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Target size={32} className="text-[#EC2801]" />
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <Target size={32} className="text-[#111111]" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900">Define your strategy</h2>
                             <p className="text-gray-500 mt-2">Help us optimize your study plan</p>
@@ -172,7 +172,7 @@ const OnboardingPage: React.FC = () => {
                                             key={stage}
                                             onClick={() => setPrepStage(stage)}
                                             className={`py-2 px-1 rounded-lg text-xs font-semibold border transition-all ${prepStage === stage
-                                                ? 'border-[#EC2801] bg-red-50 text-[#EC2801]'
+                                                ? 'border-[#111111] bg-[#111111] text-white'
                                                 : 'border-gray-200 text-gray-500 hover:bg-gray-50'
                                                 }`}
                                         >
@@ -189,7 +189,7 @@ const OnboardingPage: React.FC = () => {
                                     value={studyGoal}
                                     onChange={(e) => setStudyGoal(e.target.value)}
                                     placeholder="e.g. Master physics section in 3 months"
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#EC2801] focus:ring-2 focus:ring-red-100 outline-none transition-all resize-none"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#111111] focus:ring-2 focus:ring-gray-100 outline-none transition-all resize-none"
                                 />
                             </div>
                         </div>
@@ -201,14 +201,16 @@ const OnboardingPage: React.FC = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-gray-50 items-center justify-center p-6 font-sans">
-            <div className="w-full max-w-lg bg-white rounded-[32px] shadow-xl border border-gray-100 overflow-hidden relative">
+        <div className="flex min-h-screen bg-gray-50 items-center justify-center p-6 font-sans relative overflow-hidden">
+            <div className="bg-grain opacity-[0.03]" />
+            
+            <div className="w-full max-w-lg bg-white rounded-[32px] shadow-xl border border-gray-100 overflow-hidden relative z-10">
                 {/* Progress Bar */}
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100 flex">
                     {[1, 2, 3].map(i => (
                         <div
                             key={i}
-                            className={`flex-1 transition-all duration-500 ${step >= i ? 'bg-[#EC2801]' : 'bg-transparent'}`}
+                            className={`flex-1 transition-all duration-500 ${step >= i ? 'bg-[#111111]' : 'bg-transparent'}`}
                         />
                     ))}
                 </div>
@@ -229,7 +231,7 @@ const OnboardingPage: React.FC = () => {
                         <button
                             onClick={handleNext}
                             disabled={loading || (step === 2 && !targetExamId)}
-                            className="group flex-1 bg-[#EC2801] text-white py-4 px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-red-700 active:scale-[0.98] transition-all shadow-lg shadow-red-100 disabled:opacity-50"
+                            className="group flex-1 bg-[#111111] text-white py-4 px-8 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#333333] active:scale-[0.98] transition-all shadow-lg shadow-gray-100 disabled:opacity-50"
                         >
                             {loading ? (
                                 <LoadingSpinner size="sm" />
