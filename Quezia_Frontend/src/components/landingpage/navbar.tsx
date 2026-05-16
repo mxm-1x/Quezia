@@ -1,147 +1,114 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { List, X, CaretDown } from '@phosphor-icons/react';
-
-const navLinks = ['Features', 'Pricing', 'Contact Us'];
+import { List, X } from '@phosphor-icons/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <>
-      <nav
-        className={`
-          fixed top-0 left-0 right-0 w-full z-50 bg-white
-        `}
-      >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-16">
+      <div className="fixed top-10 left-0 right-0 z-50 flex justify-center px-6 pointer-events-none">
+        <motion.nav
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className={`
+            pointer-events-auto
+            flex items-center justify-between
+            w-full max-w-3xl h-14 px-6
+            bg-white/80 backdrop-blur-md
+            border border-[#EAEAEA] rounded-full
+            shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]
+            transition-all duration-300
+            ${isScrolled ? 'max-w-2xl h-12 px-5' : ''}
+          `}
+        >
           {/* Logo */}
-          <Link
-            to="/home"
-            className="text-2xl font-bold text-gray-900"
-          >
-            Quezia
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-[#111111] rounded-full flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold font-mono">Q</span>
+            </div>
+            <span className={`font-bold tracking-tighter text-[#111111] transition-all ${isScrolled ? 'text-sm' : 'text-base'}`}>QUEZIA</span>
           </Link>
 
-          {/* Desktop Right Side (Links & CTAs) */}
-          <div className="hidden md:flex items-center gap-8">
-            {/* Nav Links */}
-            <div className="flex items-center gap-6">
-              <div className="relative group">
-                <button className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors h-16">
-                  Exams <CaretDown size={14} weight="bold" className="transition-transform group-hover:rotate-180" />
-                </button>
-                <div className="absolute top-[calc(100%-16px)] left-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                  <div className="w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 flex flex-col">
-                    {['JEE', 'NEET', 'UPSC', 'SSC'].map((exam) => (
-                      <Link key={exam} to={`/exams/${exam.toLowerCase()}`} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                        {exam}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {navLinks.map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  {item}
-                </a>
-              ))}
-            </div>
-
-            {/* CTAs */}
-            <div className="flex items-center gap-3">
-              <Link
-                to="/auth?mode=register"
-                className="px-5 py-2 rounded-full text-sm font-medium bg-[#EC2801] text-white hover:bg-[#d12300] transition-colors duration-300"
-              >
-                Get Started
-              </Link>
-            </div>
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-6">
+            <a href="#features" className="text-xs font-bold uppercase tracking-widest text-[#787774] hover:text-[#111111] transition-colors">Features</a>
+            <a href="#solutions" className="text-xs font-bold uppercase tracking-widest text-[#787774] hover:text-[#111111] transition-colors">Solutions</a>
+            <a href="#pricing" className="text-xs font-bold uppercase tracking-widest text-[#787774] hover:text-[#111111] transition-colors">Pricing</a>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-800"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X size={24} weight="bold" /> : <List size={24} weight="bold" />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Drawer */}
-      <div
-        className={`
-          fixed inset-0 z-40 md:hidden transition-all duration-300
-          ${mobileOpen ? 'visible' : 'invisible'}
-        `}
-      >
-        {/* Overlay */}
-        <div
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-300
-            ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
-          onClick={() => setMobileOpen(false)}
-        />
-
-        {/* Panel */}
-        <div
-          className={`absolute top-0 right-0 w-[280px] h-full bg-white shadow-2xl
-            transform transition-transform duration-300 pt-20 px-6
-            ${mobileOpen ? 'translate-x-0' : 'translate-x-full'}`}
-        >
-          <div className="flex flex-col gap-2">
-            <div className="py-2 px-4">
-              <div className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Exams</div>
-              <div className="flex flex-col gap-2 border-l-2 border-gray-100 pl-4 ml-2">
-                {['JEE', 'NEET', 'UPSC', 'SSC'].map((exam) => (
-                  <Link
-                    key={exam}
-                    to={`/exams/${exam.toLowerCase()}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="py-2 text-gray-600 font-medium hover:text-gray-900 transition-colors"
-                  >
-                    {exam}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {navLinks.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(/\s+/g, '-')}`}
-                onClick={() => setMobileOpen(false)}
-                className="py-3 px-4 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
+          {/* CTAs */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/auth?mode=login"
+              className="hidden sm:inline-flex px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#787774] hover:text-[#111111] transition-colors"
+            >
+              Login
+            </Link>
             <Link
               to="/auth?mode=register"
-              onClick={() => setMobileOpen(false)}
-              className="py-3 px-4 bg-[#EC2801] text-white font-semibold rounded-full text-center
-                         hover:bg-[#d12300] transition-colors"
+              className={`
+                bg-[#111111] text-white text-xs font-bold uppercase tracking-widest rounded-full
+                hover:bg-[#333333] transition-all duration-200 active:scale-[0.98]
+                ${isScrolled ? 'px-4 py-1.5' : 'px-5 py-2'}
+              `}
             >
-              Get Started
+              Join
             </Link>
+            
+            {/* Mobile Toggle */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-1 text-[#111111]"
+            >
+              {mobileOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
+            </button>
           </div>
-        </div>
+        </motion.nav>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            className="fixed inset-0 z-40 bg-white/60 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute top-24 left-6 right-6 bg-white border border-[#EAEAEA] rounded-2xl p-6 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col gap-6">
+                <a href="#features" onClick={() => setMobileOpen(false)} className="text-sm font-bold uppercase tracking-widest text-[#111111]">Features</a>
+                <a href="#solutions" onClick={() => setMobileOpen(false)} className="text-sm font-bold uppercase tracking-widest text-[#111111]">Solutions</a>
+                <a href="#pricing" onClick={() => setMobileOpen(false)} className="text-sm font-bold uppercase tracking-widest text-[#111111]">Pricing</a>
+                <hr className="border-[#EAEAEA]" />
+                <div className="flex flex-col gap-3">
+                  <Link to="/auth?mode=login" onClick={() => setMobileOpen(false)} className="text-center py-2 text-sm font-bold uppercase tracking-widest text-[#787774]">Login</Link>
+                  <Link to="/auth?mode=register" onClick={() => setMobileOpen(false)} className="text-center py-3 bg-[#111111] text-white text-sm font-bold uppercase tracking-widest rounded-xl">Join Now</Link>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

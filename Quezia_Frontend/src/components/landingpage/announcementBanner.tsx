@@ -3,16 +3,16 @@ import { Sparkle } from '@phosphor-icons/react';
 
 const AnnouncementBanner: React.FC = () => {
     return (
-        <div className="w-full bg-[#EC2801] text-white py-2.5 text-center z-40 relative mt-16">
+        <div className="w-full bg-[#FBF3DB] border-b border-[#956400]/10 text-[#956400] py-2 text-center z-40 relative">
             <div className="max-w-7xl mx-auto px-6 flex items-center justify-center gap-2">
-                <Sparkle size={16} weight="fill" className="shrink-0" />
-                <p className="text-sm font-medium">
+                <Sparkle size={14} weight="bold" className="shrink-0" />
+                <p className="text-[11px] font-mono font-bold uppercase tracking-widest">
                     Quezia is now in beta.{' '}
                     <a
                         href="#"
-                        className="underline underline-offset-2 font-semibold hover:opacity-80 transition-opacity"
+                        className="underline underline-offset-4 hover:text-[#111111] transition-colors"
                     >
-                        Learn more about our journey and what's next →
+                        Read the journey →
                     </a>
                 </p>
             </div>

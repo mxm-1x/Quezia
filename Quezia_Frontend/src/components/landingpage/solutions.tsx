@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 
 interface SolutionCardProps {
     badge: string;
@@ -7,6 +8,7 @@ interface SolutionCardProps {
     heading: string;
     description: string;
     placeholderLabel: string;
+    index: number;
 }
 
 const SolutionCard: React.FC<SolutionCardProps> = ({
@@ -15,28 +17,35 @@ const SolutionCard: React.FC<SolutionCardProps> = ({
     heading,
     description,
     placeholderLabel,
+    index,
 }) => (
-    <div className="bg-gray-50 rounded-3xl overflow-hidden border border-gray-100">
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-[#FBFBFA] rounded-xl overflow-hidden border border-[#EAEAEA]"
+    >
         <div className="grid md:grid-cols-2 gap-0">
             {/* Text content */}
-            <div className="p-8 lg:p-10 flex flex-col justify-center">
+            <div className="p-10 lg:p-12 flex flex-col justify-center bg-white">
                 <span
-                    className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white mb-5 w-fit"
-                    style={{ backgroundColor: badgeColor }}
+                    className="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider mb-6 w-fit border"
+                    style={{ backgroundColor: `${badgeColor}20`, color: badgeColor, borderColor: `${badgeColor}40` }}
                 >
                     {badge}
                 </span>
-                <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-4">
+                <h3 className="text-3xl font-bold text-[#111111] leading-tight mb-6 tracking-tight">
                     {heading}
                 </h3>
-                <p className="text-gray-500 leading-relaxed mb-6">
+                <p className="text-[#787774] leading-relaxed mb-8 text-lg">
                     {description}
                 </p>
                 <a
                     href="#"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-gray-200 rounded-full
-                     text-sm font-semibold text-gray-700 hover:border-gray-300 hover:bg-white
-                     transition-all duration-300 w-fit group"
+                    className="inline-flex items-center gap-2 px-6 py-2 border border-[#EAEAEA] rounded-md
+                     text-sm font-medium text-[#111111] hover:bg-[#F9F9F8]
+                     transition-all duration-200 w-fit group active:scale-[0.98]"
                 >
                     Learn more
                     <ArrowRight size={14} weight="bold" className="transition-transform group-hover:translate-x-0.5" />
@@ -44,51 +53,58 @@ const SolutionCard: React.FC<SolutionCardProps> = ({
             </div>
 
             {/* Image placeholder */}
-            <div className="bg-gray-100 min-h-[260px] flex items-center justify-center border-t md:border-t-0 md:border-l border-gray-200">
-                <div className="text-center p-8">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gray-200 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-xl bg-gray-300" />
+            <div className="bg-[#FBFBFA] min-h-[320px] flex items-center justify-center border-t md:border-t-0 md:border-l border-[#EAEAEA]">
+                <div className="text-center p-12">
+                    <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-white border border-[#EAEAEA] flex items-center justify-center">
+                        <div className="w-6 h-6 rounded bg-[#F7F6F3]" />
                     </div>
-                    <p className="text-gray-400 text-sm font-medium">{placeholderLabel}</p>
+                    <p className="text-[#787774] text-sm font-medium">{placeholderLabel}</p>
                 </div>
             </div>
         </div>
-    </div>
+    </motion.div>
 );
 
 const Solutions: React.FC = () => {
     return (
-        <section className="py-20 lg:py-28 bg-white" id="solutions">
-            <div className="max-w-6xl mx-auto px-6 lg:px-8">
+        <section className="py-32 bg-white border-b border-[#EAEAEA]" id="solutions">
+            <div className="max-w-6xl mx-auto px-6">
                 {/* Section header */}
-                <div className="mb-14 max-w-2xl">
-                    <span className="text-[#EC2801] text-xs font-bold uppercase tracking-[0.2em] mb-4 block">
-                        Solutions
-                    </span>
-                    <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-gray-900 leading-tight mb-5">
-                        Structured preparation for both sides of the exam
+                <motion.div 
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    className="mb-20 max-w-2xl"
+                >
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#EDF3EC] text-[#346538] mb-6 tracking-wide uppercase">
+                        Product Ecosystem
+                    </div>
+                    <h2 className="text-4xl sm:text-5xl font-bold text-[#111111] leading-[1.1] mb-8">
+                        Structured preparation for both sides
                     </h2>
-                    <p className="text-gray-500 text-lg leading-relaxed">
+                    <p className="text-[#787774] text-lg leading-relaxed">
                         Empowering aspirants and institutions with AI-driven, structured practice solutions.
-                        Proven to increase exam readiness, improve performance, and support focused preparation.
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Solution cards */}
-                <div className="space-y-8">
+                <div className="space-y-12">
                     <SolutionCard
+                        index={0}
                         badge="For Aspirants"
-                        badgeColor="#EC2801"
+                        badgeColor="#1F6C9F"
                         heading="From structured practice to exam-day confidence"
-                        description="AI-powered practice that isn't just another question bank. Get real exam simulations, track your improvement with deep analytics, and build exam-specific instincts through deliberate, pattern-aligned practice."
-                        placeholderLabel="Aspirant Dashboard Preview"
+                        description="AI-powered practice that isn't just another question bank. Get real exam simulations and build exam-specific instincts through pattern-aligned practice."
+                        placeholderLabel="Aspirant Dashboard"
                     />
                     <SolutionCard
+                        index={1}
                         badge="For Institutions"
-                        badgeColor="#F59E0B"
+                        badgeColor="#956400"
                         heading="Learning customized to your students' needs"
-                        description="Whether your students need more challenge or more support, Quezia adapts to each learner. Track batch performance, identify weak areas across cohorts, and deliver data-driven coaching at scale."
-                        placeholderLabel="Institution Dashboard Preview"
+                        description="Whether your students need more challenge or more support, Quezia adapts to each learner. Track batch performance and deliver data-driven coaching."
+                        placeholderLabel="Institution Dashboard"
                     />
                 </div>
             </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const featureItems = [
   'Exam Blueprints',
@@ -12,105 +13,90 @@ const featureItems = [
 ];
 
 const Features: React.FC = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
   return (
-    <section className="py-20 lg:py-28 bg-[#0a0a0a] text-white" id="features">
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <section className="py-32 bg-white border-b border-[#EAEAEA]" id="features">
+      <div className="max-w-6xl mx-auto px-6">
         {/* Section header */}
-        <div className="mb-16 max-w-2xl">
-          <span className="text-[#EC2801] text-xs font-bold uppercase tracking-[0.2em] mb-4 block">
-            Features
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-5">
-            Built from the ground up for serious preparation
+        <motion.div 
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-24 max-w-2xl"
+        >
+          <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#E1F3FE] text-[#1F6C9F] mb-6 tracking-wide uppercase">
+            Platform Capabilities
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#111111] leading-[1.1] mb-8">
+            Serious tools for serious aspirants
           </h2>
-          <p className="text-white/50 text-lg leading-relaxed">
-            Every feature in Quezia, from adaptive difficulty to deep analytics,
-            is designed to help aspirants meet each exam's unique demands
-            and pace of learning.
+          <p className="text-[#787774] text-lg leading-relaxed max-w-lg">
+            Every feature in Quezia is designed to meet the rigorous demands of high-stakes competitive exams.
           </p>
-        </div>
+        </motion.div>
 
         {/* Content: Feature list + Screenshot */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Left: Feature list */}
-          <div className="space-y-1">
+          <motion.div 
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="divide-y divide-[#EAEAEA]"
+          >
             {featureItems.map((item, i) => (
               <button
                 key={i}
                 onMouseEnter={() => setActiveIndex(i)}
-                onMouseLeave={() => setActiveIndex(null)}
                 className={`
-                  w-full text-left py-4 px-2 border-b border-white/[0.06] transition-all duration-300
-                  group flex items-center gap-3
-                  ${activeIndex === i ? 'text-white' : 'text-white/50 hover:text-white/80'}
+                  w-full text-left py-6 px-2 transition-all duration-200
+                  group flex items-center justify-between
+                  ${activeIndex === i ? 'text-[#111111]' : 'text-[#787774] hover:text-[#111111]'}
                 `}
               >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-300
-                    ${activeIndex === i ? 'bg-[#EC2801] scale-125' : 'bg-white/20'}`}
-                />
-                <span className="text-lg font-medium">{item}</span>
+                <div className="flex items-center gap-4">
+                  <span className={`font-mono text-sm ${activeIndex === i ? 'text-[#111111]' : 'text-[#EAEAEA]'}`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-xl font-medium tracking-tight">{item}</span>
+                </div>
+                <div className={`w-2 h-2 rounded-full transition-all duration-300 ${activeIndex === i ? 'bg-[#111111] opacity-100' : 'bg-[#EAEAEA] opacity-0 group-hover:opacity-100'}`} />
               </button>
             ))}
-          </div>
+          </motion.div>
 
           {/* Right: Product screenshot placeholder */}
-          <div className="relative">
-            <div className="bg-white/[0.04] rounded-2xl border border-white/[0.08] overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative lg:sticky lg:top-32"
+          >
+            <div className="bg-[#FBFBFA] rounded-xl border border-[#EAEAEA] overflow-hidden shadow-sm">
               {/* Screenshot header bar */}
-              <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.06]">
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-                <div className="ml-4 h-5 w-40 bg-white/[0.04] rounded" />
+              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-[#EAEAEA] bg-white">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#EAEAEA]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#EAEAEA]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#EAEAEA]" />
               </div>
 
               {/* Screenshot body */}
-              <div className="aspect-[4/3] flex items-center justify-center p-8">
-                {/* Mock UI elements */}
-                <div className="w-full max-w-sm space-y-4">
-                  {/* Mock input */}
-                  <div className="bg-white/[0.06] rounded-xl px-4 py-3 border border-white/[0.08]">
-                    <p className="text-white/20 text-sm">Create a practice test on thermodynamics...</p>
+              <div className="aspect-[4/3] flex items-center justify-center p-12 bg-white">
+                <div className="w-full space-y-6">
+                  <div className="h-10 w-2/3 bg-[#F7F6F3] rounded-md border border-[#EAEAEA]" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-24 bg-[#F7F6F3] rounded-md border border-[#EAEAEA]" />
+                    <div className="h-24 bg-[#F7F6F3] rounded-md border border-[#EAEAEA]" />
                   </div>
-
-                  {/* Mock action bar */}
-                  <div className="flex items-center gap-3">
-                    <div className="h-7 w-24 bg-white/[0.04] rounded border border-white/[0.06]" />
-                    <div className="flex gap-2 ml-auto">
-                      {[1, 2, 3, 4].map((n) => (
-                        <div key={n} className="w-7 h-7 rounded bg-white/[0.04] border border-white/[0.06]" />
-                      ))}
-                    </div>
-                    <div className="px-4 py-1.5 bg-[#EC2801] rounded-lg">
-                      <span className="text-white text-xs font-semibold">Generate</span>
-                    </div>
-                  </div>
-
-                  {/* Mock cards grid */}
-                  <div className="grid grid-cols-3 gap-2 mt-4">
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
-                      <div
-                        key={n}
-                        className="aspect-square rounded-lg bg-white/[0.03] border border-white/[0.06]
-                                   flex items-center justify-center"
-                      >
-                        <div className="w-6 h-6 rounded bg-white/[0.06]" />
-                      </div>
-                    ))}
-                  </div>
+                  <div className="h-32 bg-[#F7F6F3] rounded-md border border-[#EAEAEA]" />
                 </div>
               </div>
             </div>
-
-            {/* Subtle glow behind the card */}
-            <div
-              className="absolute -inset-4 -z-10 rounded-3xl opacity-30 blur-3xl"
-              style={{ background: 'radial-gradient(ellipse at center, #EC2801, transparent 70%)' }}
-            />
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -1,58 +1,62 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const About: React.FC = () => {
   return (
-    <section className="py-20 lg:py-28 bg-gray-50" id="about">
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left: Text content — PRESERVED exactly as original */}
-          <div>
-            <span className="text-[#EC2801] text-xs font-bold uppercase tracking-[0.2em] mb-4 block">
-              Why We Write Our Code
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 leading-tight">
-              Designed for
-              <br />
-              serious preparation
+    <section className="py-32 bg-[#FBFBFA] border-b border-[#EAEAEA]" id="about">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
+          {/* Left: Text content */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#FDEBEC] text-[#9F2F2D] mb-6 tracking-wide uppercase">
+              Mission Statement
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-[#111111] mb-8 leading-[1.1] tracking-tight">
+              Designed for serious preparation
             </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Quezia is a structured exam preparation system built for aspirants who care about depth, clarity, and measurable progress. It is designed around how competitive exams are actually constructed — not shortcuts, distractions, or surface-level practice. Every component is intentional, guiding learners from foundational concepts to applied mastery through focused practice, real exam patterns, and continuous feedback. The goal is simple: reduce noise, eliminate guesswork, and create a preparation flow where effort compounds into understanding, confidence, and performance.
+            <p className="text-lg text-[#787774] leading-relaxed">
+              Quezia is a structured exam preparation system built for aspirants who care about depth, clarity, and measurable progress. It is designed around how competitive exams are actually constructed — not shortcuts, distractions, or surface-level practice. Every component is intentional, guiding learners from foundational concepts to applied mastery.
             </p>
-          </div>
+          </motion.div>
 
           {/* Right: Visual placeholder */}
-          <div className="relative">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-              <div className="aspect-[4/3] flex items-center justify-center p-8">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
+          >
+            <div className="bg-white rounded-xl border border-[#EAEAEA] shadow-sm overflow-hidden">
+              <div className="aspect-[4/3] flex items-center justify-center p-12 bg-white">
                 {/* Mock workflow visualization */}
-                <div className="w-full max-w-xs space-y-6">
-                  {/* Step indicators */}
+                <div className="w-full max-w-xs space-y-8 relative">
                   {[
-                    { label: 'Dataset', opacity: 'bg-[#EC2801]/10 border-[#EC2801]/20', dotColor: 'bg-[#EC2801]' },
-                    { label: 'Intelligence', opacity: 'bg-[#EC2801]/15 border-[#EC2801]/30', dotColor: 'bg-[#EC2801]' },
-                    { label: 'Output', opacity: 'bg-gray-100 border-gray-200', dotColor: 'bg-gray-400' },
+                    { label: 'Intelligence', color: 'bg-[#111111]' },
+                    { label: 'Synthesis', color: 'bg-[#787774]' },
+                    { label: 'Evaluation', color: 'bg-[#EAEAEA]' },
                   ].map((step, i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      {/* Connector line */}
-                      {i > 0 && (
-                        <div className="absolute ml-[19px] -mt-12 w-0.5 h-6 bg-gray-200" />
-                      )}
-                      <div className={`w-10 h-10 rounded-xl ${step.opacity} border flex items-center justify-center shrink-0`}>
-                        <div className={`w-2.5 h-2.5 rounded-full ${step.dotColor}`} />
+                    <div key={i} className="flex items-center gap-6 relative z-10">
+                      <div className={`w-12 h-12 rounded-lg ${step.color} border border-[#EAEAEA] flex items-center justify-center shrink-0`}>
+                        <div className="w-2 h-2 rounded-full bg-white/20" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">{step.label}</p>
-                        <div className="flex gap-1 mt-1">
-                          <div className="h-1 w-12 bg-gray-200 rounded-full" />
-                          <div className="h-1 w-8 bg-gray-100 rounded-full" />
-                        </div>
+                        <p className="text-sm font-bold text-[#111111] uppercase tracking-widest">{step.label}</p>
+                        <div className="h-1 w-24 bg-[#F7F6F3] rounded-full mt-2" />
                       </div>
                     </div>
                   ))}
+                  {/* Connector line */}
+                  <div className="absolute left-[23px] top-6 bottom-6 w-[1px] bg-[#EAEAEA] -z-0" />
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
