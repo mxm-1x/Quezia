@@ -78,7 +78,7 @@ const TestResultPage: React.FC = () => {
 
                         <div className="pt-4 border-t border-[var(--color-border-default)] flex gap-4">
                             <button
-                                onClick={() => navigate(`/dashboard/analytics/${test?.id}`)}
+                                onClick={() => navigate(`/dashboard/analytics/attempt/${result.id}`)}
                                 className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition"
                             >
                                 View Detailed Analytics

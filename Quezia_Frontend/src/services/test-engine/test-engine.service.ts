@@ -200,6 +200,16 @@ export const testEngineService = {
         return response.data;
     },
 
+    getAttemptDeltas: async (attemptId: string): Promise<any[]> => {
+        const response = await apiClient.get<any[]>(`/attempts/${attemptId}/deltas`);
+        return response.data;
+    },
+
+    getLatestInsights: async (examId: string): Promise<any> => {
+        const response = await apiClient.get<any>(`/analytics/insights/latest/${examId}`);
+        return response.data;
+    },
+
     deleteThread: async (id: string): Promise<void> => {
         await apiClient.delete(`/test-threads/${id}`);
     },

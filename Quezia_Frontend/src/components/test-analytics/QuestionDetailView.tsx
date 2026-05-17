@@ -175,7 +175,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     )
 }
 
-const MetaItem = ({ icon, label, value, color = 'text-white' }: { icon: React.ReactNode, label: string, value: string, color?: string }) => (
+const MetaItem = ({ icon, label, value, color = 'text-[var(--color-text-primary)]' }: { icon: React.ReactNode, label: string, value: string, color?: string }) => (
     <div className="flex flex-col">
         <span className="text-[8px] font-bold text-[var(--color-text-disabled)] uppercase tracking-widest flex items-center gap-1">
             {icon}{label}

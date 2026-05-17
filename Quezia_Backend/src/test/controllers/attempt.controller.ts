@@ -43,6 +43,14 @@ export class AttemptController {
     return this.testLifecycleService.getAttemptReview(attemptId, user.userId);
   }
 
+  @Get(':id/deltas')
+  async getAttemptDeltas(
+    @Param('id') attemptId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    return this.testLifecycleService.getAttemptDeltas(attemptId, user.userId);
+  }
+
   @Post(':testId/start')
   async startAttempt(
     @Param('testId') testId: string,

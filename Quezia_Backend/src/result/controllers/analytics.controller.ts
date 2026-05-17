@@ -115,4 +115,26 @@ export class AnalyticsController {
       benchmark,
     };
   }
+
+  @Get('insights/latest/:examId')
+  async getLatestInsights(
+    @Param('examId') examId: string,
+    @CurrentUser() user: { userId: string },
+  ) {
+    const insight = await this.prisma.insightLog.findFirst({
+      where: {
+        userId: user.userId,
+        examId,
+      },
+      orderBy: {
+        generatedAt: 'desc',
+      },
+    });
+
+    if (!insight) {
+      return { insightPayload: null };
+    }
+
+    return insight;
+  }
 }

@@ -463,4 +463,74 @@ export class TestLifecycleService {
       questions,
     };
   }
+
+  async getAttemptDeltas(attemptId: string, userId: string) {
+    const currentAttempt = await this.prisma.testAttempt.findUnique({
+      where: { id: attemptId },
+      include: { test: true },
+    });
+
+    if (!currentAttempt) throw new NotFoundException('Attempt not found');
+    if (currentAttempt.userId !== userId)
+      throw new ForbiddenException('Not your attempt');
+
+    const previousAttempt = await this.prisma.testAttempt.findFirst({
+      where: {
+        userId,
+        test: { examId: currentAttempt.test.examId },
+        status: AttemptStatus.COMPLETED,
+        completedAt: { lt: currentAttempt.completedAt || new Date() },
+        id: { not: attemptId },
+      },
+      orderBy: { completedAt: 'desc' },
+    });
+
+    if (!previousAttempt) {
+      return [
+        { label: 'Score', value: 0, direction: 'neutral', isGood: true },
+        { label: 'Accuracy', value: 0, direction: 'neutral', isGood: true },
+        { label: 'Time', value: 0, direction: 'neutral', isGood: true },
+        { label: 'Efficiency', value: 0, direction: 'neutral', isGood: true },
+      ];
+    }
+
+    const scoreDelta =
+      Number(currentAttempt.totalScore || 0) -
+      Number(previousAttempt.totalScore || 0);
+    const accuracyDelta =
+      Number(currentAttempt.accuracy || 0) -
+      Number(previousAttempt.accuracy || 0);
+
+    const currentTime = currentAttempt.timeSpentSeconds || 0;
+    const prevTime = previousAttempt.timeSpentSeconds || 0;
+    const timeDelta = prevTime - currentTime; // Positive means we were faster
+
+    return [
+      {
+        label: 'Score',
+        value: scoreDelta,
+        direction: scoreDelta > 0 ? 'up' : scoreDelta < 0 ? 'down' : 'neutral',
+        isGood: scoreDelta >= 0,
+      },
+      {
+        label: 'Accuracy',
+        value: Math.round(accuracyDelta),
+        direction:
+          accuracyDelta > 0 ? 'up' : accuracyDelta < 0 ? 'down' : 'neutral',
+        isGood: accuracyDelta >= 0,
+      },
+      {
+        label: 'Time',
+        value: Math.abs(Math.round(timeDelta / 60)),
+        direction: timeDelta > 0 ? 'up' : timeDelta < 0 ? 'down' : 'neutral',
+        isGood: timeDelta >= 0, // Faster is better
+      },
+      {
+        label: 'Efficiency',
+        value: accuracyDelta > 0 ? 5 : 0,
+        direction: accuracyDelta > 0 ? 'up' : 'neutral',
+        isGood: true,
+      },
+    ];
+  }
 }

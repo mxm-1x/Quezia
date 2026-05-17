@@ -22,20 +22,41 @@ const TestAnalyticsPage = () => {
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
     const [reviewData, setReviewData] = useState<AttemptReviewResponse | null>(null)
+    const [deltas, setDeltas] = useState<any[]>([])
+    const [aiInsights, setAIInsights] = useState<any>(null)
     const [error, setError] = useState<string | null>(null)
 
     // -------------------------------------------------------------------------
-    // Data Fetching — single endpoint
+    // Data Fetching
     // -------------------------------------------------------------------------
     useEffect(() => {
-        const loadReview = async () => {
+        const loadAllData = async () => {
             if (!attemptId) return
             try {
                 setLoading(true)
                 const data = await testEngineService.getAttemptReview(attemptId)
                 setReviewData(data)
+
+                // Fetch Deltas
+                try {
+                    const deltaData = await testEngineService.getAttemptDeltas(attemptId)
+                    setDeltas(deltaData)
+                } catch (e) {
+                    console.warn('Failed to load deltas', e)
+                }
+
+                // Fetch AI Insights
+                if (data.attempt.testId) {
+                    try {
+                        const test = await testEngineService.getTest(data.attempt.testId)
+                        const insights = await testEngineService.getLatestInsights(test.examId)
+                        setAIInsights(insights?.insightPayload)
+                    } catch (e) {
+                        console.warn('Failed to load AI insights', e)
+                    }
+                }
+
             } catch (err: any) {
-                // Failed to load attempt review
                 const status = err?.response?.status
                 if (status === 404) setError('Attempt not found.')
                 else if (status === 403) setError('You do not have access to this attempt.')
@@ -46,10 +67,10 @@ const TestAnalyticsPage = () => {
             }
         }
 
-        loadReview()
+        loadAllData()
     }, [attemptId])
 
-    // Aliases for convenience
+    // Aliases
     const attempt = reviewData?.attempt ?? null
     const summary = reviewData?.summary ?? null
     const reviewQuestions = reviewData?.questions ?? []
@@ -58,7 +79,7 @@ const TestAnalyticsPage = () => {
     // Derived Analytics Data
     // -------------------------------------------------------------------------
 
-    // 1. Map backend ReviewQuestion[] → QuestionReviewData[] for UI components
+    // 1. Map backend ReviewQuestion[] → QuestionReviewData[]
     const detailedQuestions = useMemo((): QuestionReviewData[] => {
         return reviewQuestions.map((rq: ReviewQuestion, idx: number) => {
             const payload = rq.contentPayload || {} as any
@@ -85,35 +106,43 @@ const TestAnalyticsPage = () => {
         })
     }, [reviewQuestions])
 
-    // 2. Tactical Insights
+    // 2. Combined Tactical Insights (AI + Derived)
     const tacticalInsights = useMemo(() => {
-        if (!detailedQuestions.length || !summary) return []
         const list: any[] = []
+        if (!detailedQuestions.length || !summary) return list
 
+        // Add AI Insights if available
+        if (aiInsights?.insights?.priority_actions) {
+            aiInsights.insights.priority_actions.slice(0, 2).forEach((action: string) => {
+                list.push({ type: 'warning', text: action })
+            });
+        }
+
+        if (aiInsights?.insights?.overall_assessment) {
+             list.push({ type: 'success', text: aiInsights.insights.overall_assessment });
+        }
+
+        // Add Derived Insights
         const marksLost = summary.incorrect * 1
         if (marksLost > 10) {
-            list.push({ type: 'critical', text: `Negative Marking (-${marksLost}m) is your biggest leak.` })
+            list.push({ type: 'critical', text: `Negative Marking (-${marksLost}m) detected.` })
         }
 
         const timeSeconds = attempt?.timeSpentSeconds || 0
         const avgTime = detailedQuestions.length > 0 ? timeSeconds / detailedQuestions.length : 0
         if (avgTime > 0 && avgTime < 150) {
-            list.push({ type: 'success', text: `Excellent Speed: ${Math.round(avgTime)}s per question.` })
-        }
-
-        const trickyMisses = detailedQuestions.filter(q => q.difficulty === 'hard' && q.status === 'incorrect').length
-        if (trickyMisses > 3) {
-            list.push({ type: 'warning', text: `Strategic Alert: ${trickyMisses} hard questions were over-attempted.` })
+            list.push({ type: 'success', text: `Excellent Speed: ${Math.round(avgTime)}s avg.` })
         }
 
         return list
-    }, [detailedQuestions, summary, attempt])
+    }, [detailedQuestions, summary, attempt, aiInsights])
 
     // 3. Subject Performance
     const subjectsData = useMemo(() => {
         const subs = ['Physics', 'Chemistry', 'Mathematics']
         return subs.map(s => {
-            const qs = detailedQuestions.filter(q => q.subject.toLowerCase() === (s === 'Mathematics' ? 'maths' : s.toLowerCase()))
+            const searchSub = (s === 'Mathematics' ? 'math' : s.toLowerCase())
+            const qs = detailedQuestions.filter(q => q.subject.toLowerCase().includes(searchSub))
             const correct = qs.filter(q => q.status === 'correct').length
             const attempted = qs.filter(q => q.status !== 'unattempted').length
             const accuracy = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
@@ -196,16 +225,6 @@ const TestAnalyticsPage = () => {
             .slice(0, 3)
     }, [detailedQuestions])
 
-    // 7. Deltas
-    const deltas = useMemo(() => {
-        return [
-            { label: 'Score', value: 0, direction: 'neutral' as any, isGood: true },
-            { label: 'Accuracy', value: 0, direction: 'neutral' as any, isGood: true },
-            { label: 'Time', value: 0, direction: 'neutral' as any, isGood: true },
-            { label: 'Efficiency', value: 12, direction: 'up' as any, isGood: true }
-        ]
-    }, [])
-
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] p-6">
@@ -224,7 +243,7 @@ const TestAnalyticsPage = () => {
     }
 
     if (loading) return (
-        <LoadingSpinner fullScreen size="lg" message="Analyzing Performance..." />
+        <LoadingSpinner fullScreen size="lg" message="Synthesizing Results..." />
     )
 
     if (!attemptId || !attempt || !summary) return null
@@ -272,20 +291,12 @@ const TestAnalyticsPage = () => {
                         riskRatio={Number(attempt.riskRatio) || 0}
                     />
 
+                    {/* Layer 2: Tactical Insights */}
+                    <div className="py-2">
+                        <TacticalInsightStrip insights={tacticalInsights} />
+                    </div>
+
                     <QuestionReviewSection questions={detailedQuestions} />
-                </div>
-
-                {/* Coming Soon Placeholder for Advanced Analytics */}
-                <Placeholder
-                    icon={Hourglass}
-                    variant="coming-soon"
-                    title="Advanced Analytics Coming Soon"
-                    description="Our intelligence engine is currently being calibrated to provide deeper tactical insights and performance trends."
-                />
-
-                {/* Layer 2: Tactical Insights */}
-                <div className="py-2">
-                    <TacticalInsightStrip insights={tacticalInsights} />
                 </div>
 
                 {/* Layer 3: Deep Analytics Matrix */}
