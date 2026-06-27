@@ -185,7 +185,7 @@ Topic: {question.get('topic', '')}
 
 Create a diagram specification that will help visualize this problem."""
         
-        response = llm.invoke(system_prompt, user_prompt, expect_json=True)
+        response = llm.invoke(system_prompt, user_prompt, expect_json=True, tier="medium")
         
         required_fields = ["diagram_type", "description", "elements"]
         for field in required_fields:
@@ -240,11 +240,76 @@ Elements: {elements}.
 Labels: {labels}. 
 Style: {style}, clean white background, clear bold lines, professional educational style, simple and uncluttered, vector art style"""
         
+        if getattr(settings, "IMAGE_PROVIDER", "pollinations") == "openrouter":
+            return _generate_image_openrouter(prompt)
         return _generate_image_pollinations(prompt)
             
     except Exception as e:
         logger.error("image_generation_failed", error=str(e))
         return None
+
+import re
+import os
+
+def _generate_image_openrouter(prompt: str) -> str:
+    """Generate image using OpenRouter models (like sourceful/riverflow-v2.5-fast)."""
+    try:
+        api_key = getattr(settings, "OPENROUTER_API_KEY", os.getenv("OPENROUTER_API_KEY"))
+        if not api_key:
+            logger.error("openrouter_api_key_missing")
+            return None
+            
+        model = getattr(settings, "IMAGE_MODEL", "sourceful/riverflow-v2.5-fast")
+        logger.info("generating_image", provider="openrouter", model=model)
+        
+        # OpenRouter chat completions endpoint
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
+        
+        # May take a while for image generation
+        response = requests.post(url, headers=headers, json=payload, timeout=120)
+        
+        if response.status_code == 200:
+            data = response.json()
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            
+            # Extract URL from markdown or raw text
+            # E.g. ![image](https://...) or just https://...
+            url_match = re.search(r'(https?://[^\s\)]+)', content)
+            if not url_match:
+                logger.error("openrouter_no_url_found", content=content)
+                return None
+                
+            image_url = url_match.group(1)
+            logger.info("downloading_generated_image", url=image_url)
+            
+            # Download the actual image
+            img_response = requests.get(image_url, timeout=60)
+            if img_response.status_code == 200:
+                image_b64 = base64.b64encode(img_response.content).decode('utf-8')
+                logger.info("image_generated", provider="openrouter", size=len(image_b64))
+                return f"data:image/png;base64,{image_b64}"
+            else:
+                logger.error("image_download_failed", status_code=img_response.status_code)
+                return None
+        else:
+            error_detail = response.text[:300] if hasattr(response, 'text') else str(response.content[:300])
+            logger.error("openrouter_image_error", status_code=response.status_code, response=error_detail)
+            return None
+            
+    except Exception as e:
+        logger.error("openrouter_image_exception", error=str(e))
+        return None
+
 
 
 

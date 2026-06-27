@@ -70,22 +70,41 @@ class LLMWrapper:
     def __init__(self):
         provider = settings.LLM_PROVIDER.lower()
         
-        if provider == "groq" and settings.GROQ_API_KEY:
-            self.llm = ChatGroq(
-                model_name=settings.LLM_MODEL,
-                temperature=settings.LLM_TEMPERATURE,
-                max_tokens=settings.LLM_MAX_TOKENS,
-                api_key=settings.GROQ_API_KEY,
-            )
-            logger.info("llm_initialized", provider="groq", model=settings.LLM_MODEL)
-        else:
-            self.llm = ChatOpenAI(
-                model=settings.LLM_MODEL,
-                temperature=settings.LLM_TEMPERATURE,
-                max_tokens=settings.LLM_MAX_TOKENS,
-                api_key=settings.OPENAI_API_KEY,
-            )
-            logger.info("llm_initialized", provider="openai", model=settings.LLM_MODEL)
+        def create_llm(model_name):
+            if provider == "openrouter" and settings.OPENROUTER_API_KEY:
+                return ChatOpenAI(
+                    model=model_name,
+                    temperature=settings.LLM_TEMPERATURE,
+                    max_tokens=settings.LLM_MAX_TOKENS,
+                    api_key=settings.OPENROUTER_API_KEY,
+                    base_url="https://openrouter.ai/api/v1",
+                    default_headers={
+                        "HTTP-Referer": "https://quezia.ai",
+                        "X-Title": "Quezia AI Service",
+                    },
+                )
+            elif provider == "groq" and settings.GROQ_API_KEY:
+                return ChatGroq(
+                    model_name=model_name,
+                    temperature=settings.LLM_TEMPERATURE,
+                    max_tokens=settings.LLM_MAX_TOKENS,
+                    api_key=settings.GROQ_API_KEY,
+                )
+            else:
+                return ChatOpenAI(
+                    model=model_name,
+                    temperature=settings.LLM_TEMPERATURE,
+                    max_tokens=settings.LLM_MAX_TOKENS,
+                    api_key=settings.OPENAI_API_KEY,
+                )
+
+        self.llms = {
+            "fast": create_llm(settings.LLM_MODEL_FAST),
+            "medium": create_llm(settings.LLM_MODEL_MEDIUM),
+            "complex": create_llm(settings.LLM_MODEL_COMPLEX)
+        }
+        
+        logger.info("llm_initialized", provider=provider, fast=settings.LLM_MODEL_FAST, medium=settings.LLM_MODEL_MEDIUM, complex=settings.LLM_MODEL_COMPLEX)
         
         # Max concurrent async calls (to avoid rate limits)
         self.max_concurrent = settings.LLM_MAX_CONCURRENT
@@ -95,7 +114,8 @@ class LLMWrapper:
         system_prompt: str,
         user_prompt: str,
         expect_json: bool = True,
-        max_retries: int = 3
+        max_retries: int = 3,
+        tier: str = "fast"
     ) -> Dict[str, Any]:
         """
         Invoke LLM with structured prompts and automatic retry on failure.
@@ -137,7 +157,7 @@ class LLMWrapper:
         last_error = None
         for attempt in range(max_retries):
             try:
-                response = self.llm.invoke(messages)
+                response = self.llms[tier].invoke(messages)
                 content = response.content
                 
                 if expect_json:
@@ -185,7 +205,8 @@ class LLMWrapper:
         system_prompt: str,
         user_prompt: str,
         expect_json: bool = True,
-        max_retries: int = 3
+        max_retries: int = 3,
+        tier: str = "fast"
     ) -> Dict[str, Any]:
         """
         Async invoke LLM with structured prompts and automatic retry on failure.
@@ -227,7 +248,7 @@ class LLMWrapper:
         for attempt in range(max_retries):
             try:
                 async with semaphore:
-                    response = await self.llm.ainvoke(messages)
+                    response = await self.llms[tier].ainvoke(messages)
                 content = response.content
                 
                 if expect_json:
@@ -274,7 +295,8 @@ class LLMWrapper:
         self,
         prompts: List[tuple],
         expect_json: bool = True,
-        max_retries: int = 3
+        max_retries: int = 3,
+        tier: str = "fast"
     ) -> List[Dict[str, Any]]:
         """
         Process multiple prompts concurrently.
@@ -305,7 +327,7 @@ class LLMWrapper:
                 prompt_expect_json = expect_json
             
             tasks.append(
-                self.ainvoke(system_prompt, user_prompt, prompt_expect_json, max_retries)
+                self.ainvoke(system_prompt, user_prompt, prompt_expect_json, max_retries, tier)
             )
         
         results = await asyncio.gather(*tasks, return_exceptions=True)

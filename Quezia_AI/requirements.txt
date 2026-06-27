@@ -12,7 +12,6 @@ openai==2.16.0
 
 # Vector store & embeddings
 pinecone-client==4.1.0
-voyageai==0.3.0
 
 # Data processing
 pandas==3.0.0

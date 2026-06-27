@@ -70,7 +70,7 @@ const QuestionWorkspace: React.FC<Props> = ({
               onReportIssue={onReportIssue}
             />
 
-            <QuestionText text={question.text} />
+            <QuestionText text={question.text} diagramImage={question.diagramImage} />
 
             {question.type === 'mcq' ? (
               <AnswerInput

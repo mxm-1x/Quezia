@@ -23,9 +23,9 @@ def migrate():
 
     # 2. Check for keys
     pinecone_key = os.getenv("PINECONE_API_KEY")
-    voyage_key = os.getenv("VOYAGE_API_KEY")
-    if not pinecone_key or not voyage_key:
-        print("❌ Error: PINECONE_API_KEY and VOYAGE_API_KEY must be set in your .env file.")
+    openrouter_key = os.getenv("OPENROUTER_API_KEY")
+    if not pinecone_key or not openrouter_key:
+        print("❌ Error: PINECONE_API_KEY and OPENROUTER_API_KEY must be set in your .env file.")
         return
 
     print("🚀 Starting migration to Pinecone...")
@@ -44,7 +44,7 @@ def migrate():
         return
 
     # 5. Batch Ingestion
-    BATCH_SIZE = 30  # Stay under 10K TPM limit
+    BATCH_SIZE = 100  # Increased batch size
     start_time = time.time()
     
     for i in range(0, total_count, BATCH_SIZE):
@@ -58,7 +58,7 @@ def migrate():
             texts.append(f"{chapter}: {text}")
         
         try:
-            # Get Embeddings from HF API
+            # Get embeddings from the configured provider.
             embeddings = get_embeddings(texts)
             
             # Prepare vectors for Pinecone
@@ -83,10 +83,10 @@ def migrate():
             store.index.upsert(vectors=vectors)
             
             elapsed = time.time() - start_time
-            print(f"✅ Ingested {i+len(batch)}/{total_count} ({((i+len(batch))/total_count)*100:.1f}%) | Elapsed: {elapsed:.1f}s")
+            print(f"✅ Ingested {min(i+len(batch), total_count)}/{total_count} ({(min(i+len(batch), total_count)/total_count)*100:.1f}%) | Elapsed: {elapsed:.1f}s")
             
-            # Stay under 3 RPM limit
-            time.sleep(25.0)
+            # Sleep a bit to avoid hitting rate limits
+            time.sleep(2.0)
             
         except Exception as e:
             print(f"⚠️ Batch starting at {i} failed: {str(e)}")

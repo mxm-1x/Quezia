@@ -91,7 +91,7 @@ Respond ONLY with valid JSON. No markdown, no additional text."""
     user_prompt = _build_study_plan_prompt(insights, metrics)
     
     try:
-        response = llm.invoke(system_prompt, user_prompt, expect_json=True)
+        response = llm.invoke(system_prompt, user_prompt, expect_json=True, tier="medium")
         
         # Validate and structure the response
         if "daily_schedule" not in response:

@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from 'react'
 import LoadingSpinner from '../components/common/LoadingSpinner'
 import Placeholder from '../components/common/Placeholder'
 import { useParams, useNavigate } from 'react-router-dom'
-import { CaretLeft, Warning, Hourglass } from '@phosphor-icons/react'
+import { CaretLeft, Warning } from '@phosphor-icons/react'
 import { testEngineService, type AttemptReviewResponse, type ReviewQuestion } from '../services/test-engine/test-engine.service'
 
 // New Redesigned Components
@@ -49,7 +49,7 @@ const TestAnalyticsPage = () => {
                 if (data.attempt.testId) {
                     try {
                         const test = await testEngineService.getTest(data.attempt.testId)
-                        const insights = await testEngineService.getLatestInsights(test.examId)
+                        const insights = await testEngineService.getLatestInsights((test as any).examId || test.threadId)
                         setAIInsights(insights?.insightPayload)
                     } catch (e) {
                         console.warn('Failed to load AI insights', e)

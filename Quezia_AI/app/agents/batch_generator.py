@@ -155,7 +155,8 @@ async def generate_batch_async(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             expect_json=True,
-            max_retries=3
+            max_retries=3,
+            tier="fast"
         )
         
         # Handle response - could be array or single object

@@ -33,7 +33,7 @@ class JEEVectorStore:
             logger.info("creating_pinecone_index", index_name=self.index_name)
             self.pc.create_index(
                 name=self.index_name,
-                dimension=1024, # Voyage-3 dimension
+                dimension=settings.EMBEDDING_DIMENSION,
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1")
             )

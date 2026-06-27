@@ -109,7 +109,7 @@ Topic: {question.get('topic')}
 Solution with ONLY formulas, concepts, and calculations. NO explanations."""
     
     try:
-        response = llm.invoke(system_prompt, user_prompt, expect_json=True)
+        response = llm.invoke(system_prompt, user_prompt, expect_json=True, tier="complex")
         
         # Validate response structure
         if "steps" not in response:

@@ -15,22 +15,30 @@ class Settings(BaseSettings):
     # API Keys
     OPENAI_API_KEY: str = ""
     GROQ_API_KEY: str = ""
+    OPENROUTER_API_KEY: str = ""
     POLLINATIONS_API_KEY: str = ""
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX_NAME: str = "jee-questions"
     GOOGLE_API_KEY: str = ""
     
     # LLM Configuration
-    LLM_PROVIDER: str = "groq"  # groq, openai
-    LLM_MODEL: str = "llama-3.3-70b-versatile"
+    LLM_PROVIDER: str = "openrouter"  # openrouter, groq, openai
+    LLM_MODEL_FAST: str = "deepseek/deepseek-v4-flash"
+    LLM_MODEL_MEDIUM: str = "openai/gpt-oss-20b"
+    LLM_MODEL_COMPLEX: str = "openai/gpt-oss-120b"
     LLM_TEMPERATURE: float = 0.3
     LLM_MAX_TOKENS: int = 8192
     LLM_MAX_CONCURRENT: int = 5
+
+    # Embedding Configuration
+    EMBEDDING_PROVIDER: str = "openrouter"
+    EMBEDDING_MODEL: str = "openai/text-embedding-3-large"
+    EMBEDDING_DIMENSION: int = 3072
     
     # Image Generation Configuration
     ENABLE_IMAGE_GENERATION: bool = False
-    IMAGE_PROVIDER: str = "pollinations"
-    POLLINATIONS_MODEL: str = "gpt-image-1-mini"
+    IMAGE_PROVIDER: str = "openrouter"
+    IMAGE_MODEL: str = "sourceful/riverflow-v2.5-fast"
     IMAGE_SIZE: str = "1024x1024"
     
     # Retry Configuration
@@ -78,13 +86,14 @@ class Settings(BaseSettings):
     def validate(self) -> None:
         """Validate that at least one LLM API key is configured."""
         has_key = any([
+            self.OPENROUTER_API_KEY,
             self.OPENAI_API_KEY,
             self.GROQ_API_KEY,
         ])
         if not has_key:
             raise ValueError(
                 "At least one API key is required: "
-                "OPENAI_API_KEY or GROQ_API_KEY"
+                "OPENROUTER_API_KEY, OPENAI_API_KEY, or GROQ_API_KEY"
             )
 
 

@@ -73,7 +73,7 @@ Respond ONLY with valid JSON. No markdown, no additional text."""
     user_prompt = _build_metrics_prompt(metrics)
     
     try:
-        response = llm.invoke(system_prompt, user_prompt, expect_json=True)
+        response = llm.invoke(system_prompt, user_prompt, expect_json=True, tier="medium")
         
         # Validate required fields
         required_fields = ["overall_assessment", "weak_topics", "strong_topics", 

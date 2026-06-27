@@ -13,6 +13,7 @@ export type MCQQuestion = {
   id: number
   questionId?: string
   text: string
+  diagramImage?: string
   marks: number
   type: 'mcq'
   options: (string | { key: string; text: string })[]
@@ -34,6 +35,7 @@ export type NumericQuestion = {
   id: number
   questionId?: string
   text: string
+  diagramImage?: string
   marks: number
   type: 'numeric'
   hint?: string

@@ -386,16 +386,20 @@ Copy `.env.example` to `.env` and configure:
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | **API Keys** | | | |
-| `HUGGINGFACE_API_KEY` | ✅* | — | HuggingFace Inference API key |
 | `GROQ_API_KEY` | ✅* | — | Groq API key |
 | `OPENAI_API_KEY` | ✅* | — | OpenAI API key |
 | `OPENROUTER_API_KEY` | ✅* | — | OpenRouter API key |
+| `PINECONE_API_KEY` | Required for RAG | — | Pinecone API key |
 | **LLM Config** | | | |
-| `LLM_PROVIDER` | ❌ | `huggingface` | `huggingface`, `groq`, or `openai` |
-| `LLM_MODEL` | ❌ | `Qwen/Qwen2.5-7B-Instruct` | Model identifier |
+| `LLM_PROVIDER` | ❌ | `openrouter` | `openrouter`, `groq`, or `openai` |
+| `LLM_MODEL` | ❌ | `openai/gpt-4o-mini` | Model identifier |
 | `LLM_TEMPERATURE` | ❌ | `0.3` | 0.0–1.0 |
 | `LLM_MAX_TOKENS` | ❌ | `8192` | Max tokens per response |
 | `LLM_MAX_CONCURRENT` | ❌ | `5` | Max concurrent LLM calls |
+| **Embeddings** | | | |
+| `EMBEDDING_PROVIDER` | ❌ | `openrouter` | Embedding API provider |
+| `EMBEDDING_MODEL` | ❌ | `openai/text-embedding-3-large` | Embedding model used for Pinecone |
+| `EMBEDDING_DIMENSION` | ❌ | `3072` | Pinecone vector dimension for the embedding model |
 | **Service** | | | |
 | `LOG_LEVEL` | ❌ | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 | `ENVIRONMENT` | ❌ | `development` | `development` or `production` |
@@ -407,9 +411,9 @@ Copy `.env.example` to `.env` and configure:
 
 | Provider | Model | Speed | Cost | Best For |
 |---|---|---|---|---|
-| **Groq** | `llama-3.3-70b-versatile` | ⚡ Fast | Free tier | Development |
-| **HuggingFace** | `Qwen/Qwen2.5-7B-Instruct` | Medium | Free tier | Budget prod |
-| **OpenAI** | `gpt-4o-mini` | Medium | ~$0.15/1M tokens | Quality prod |
+| **OpenRouter** | `openai/gpt-4o-mini` | Medium | Low | Default routing and model flexibility |
+| **Groq** | `llama-3.3-70b-versatile` | Fast | Free tier | Development |
+| **OpenAI** | `gpt-4o-mini` | Medium | Low | Direct OpenAI fallback |
 
 ---
 

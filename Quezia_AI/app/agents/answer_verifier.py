@@ -135,6 +135,7 @@ def answer_verifier(state: AIState) -> AIState:
             user_prompt=user_prompt,
             expect_json=True,
             max_retries=2,
+            tier="complex"
         )
 
         verifier_answer = response.get("answer", "")

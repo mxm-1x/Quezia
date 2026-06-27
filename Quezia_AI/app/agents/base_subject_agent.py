@@ -225,7 +225,7 @@ class SubjectAgent:
         logger.info(f"{self.subject}_agent_generating", difficulty=difficulty, topic=topic)
 
         try:
-            response = llm.invoke(system_prompt, user_prompt, expect_json=True)
+            response = llm.invoke(system_prompt, user_prompt, expect_json=True, tier="complex")
         except Exception as e:
             logger.error(f"{self.subject}_agent_llm_invocation_failed", error=str(e))
             raise ValueError(f"Failed to generate {self.subject} question: {e}")
@@ -256,7 +256,7 @@ class SubjectAgent:
         logger.info(f"{self.subject}_async_generating", difficulty=difficulty, topic=topic)
 
         try:
-            response = await llm.ainvoke(system_prompt, user_prompt, expect_json=True)
+            response = await llm.ainvoke(system_prompt, user_prompt, expect_json=True, tier="complex")
         except Exception as e:
             logger.error(f"{self.subject}_async_llm_failed", error=str(e))
             raise ValueError(f"Failed to generate {self.subject} question: {e}")

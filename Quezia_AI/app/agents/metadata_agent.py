@@ -172,7 +172,8 @@ async def enrich_question_async(
             system_prompt=METADATA_SYSTEM_PROMPT,
             user_prompt=user_prompt,
             expect_json=True,
-            max_retries=2
+            max_retries=2,
+            tier="fast"
         )
         
         if not isinstance(response, dict):
