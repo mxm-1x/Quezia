@@ -388,7 +388,7 @@ async def test_assembler(state: AIState) -> AIState:
     state["test_questions"] = test_questions
     
     # Generate test metadata
-    if test_questions:
+    if True:
         try:
             metadata = _generate_test_metadata(test_questions, subjects, question_count)
             state["test_metadata"] = metadata
